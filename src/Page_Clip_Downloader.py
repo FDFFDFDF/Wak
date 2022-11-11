@@ -338,7 +338,7 @@ if __name__ == '__main__':
 
                 #-> from urllib.request import urlretrieve 참조
                 #-> 영상을 실제로 다운로드
-                urlretrieve(vid_url, directory+'/['+vid_date+']'+vid_title+'.mp4')
+                urlretrieve(vid_url, directory+'/'+vid_title+'.mp4')
 
                 logger.info("클립 다운로드 완료")
 
