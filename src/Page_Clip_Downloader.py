@@ -49,7 +49,7 @@ if __name__ == '__main__':
         if not os.path.exists(Clip_file):
 
             ### config 파일 읽기
-            f_conf = open('config_.txt','r', encoding='UTF8')
+            f_conf = open('config.txt','r', encoding='UTF8')
 
             conf = f_conf.read().split('\n')
 
