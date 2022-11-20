@@ -125,6 +125,7 @@ if __name__ == '__main__':
             login_btn.click()
             time.sleep(2)
 
+            pyperclip.copy('')
 
 
             ## 네이버 카페 접속 및 클립 주소 얻기 ##
