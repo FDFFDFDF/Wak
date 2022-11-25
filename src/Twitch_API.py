@@ -22,7 +22,7 @@ class Twitch_API():
         # 아래 두 주소 참고해서 본인만의 키를 발급 받아 사용하세요 킹아!
         # https://dev.twitch.tv/docs/api/get-started
         # https://dev.twitch.tv/docs/authentication/getting-tokens-oauth/#oauth-client-credentials-flow
-        self.headers={'Authorization': '', 'client-id': ''}
+        self.headers={'Authorization': 'Bearer sev771hx6gxz7f9fso4utp5f1disxp', 'client-id': 'n0ngkqgxuek9p3fplo6uqxw5rv2gr1'}
 
 
         # 스트리머별 ID
@@ -130,7 +130,12 @@ class Twitch_API():
             
             f_clips = open(self.Clip_file,'a', encoding='UTF8', newline="")       
             wr = csv.writer(f_clips)
-            keys = ['id', 'url', 'embed_url', 'broadcaster_id', 'broadcaster_name', 'creator_id', 'creator_name', 'video_id', 'game_id', 'language', 'title', 'view_count', 'created_at', 'thumbnail_url', 'duration', 'vod_offset', 'is_downloaded', 'file_path']
+            #keys = ['id', 'url', 'embed_url', 'broadcaster_id', 'broadcaster_name', 'creator_id', 'creator_name', 'video_id', 'game_id', 'language', 'title', 'view_count', 'created_at', 'thumbnail_url', 'duration', 'vod_offset', 'is_downloaded', 'file_path']
+            keys = ['id', 'url', 'embed_url', 'broadcaster_id', 'broadcaster_name', 
+            'creator_id', 'creator_name', 'video_id', 'game_id', 'language', 
+            'title', 'view_count', 'created_at', 'thumbnail_url', 'duration', 'vod_offset', 
+            'is_downloaded', 'file_path', 'is_fixed_for_YT','Youtube_URL','Youtube_timeline']
+
             wr.writerow(keys)
             f_clips.close()
 
@@ -169,7 +174,11 @@ class Twitch_API():
                 f_clips.close()
                 f_clips = open(self.Clip_file,'w', encoding='UTF8', newline="")
                 wr = csv.writer(f_clips)
-                keys = ['id', 'url', 'embed_url', 'broadcaster_id', 'broadcaster_name', 'creator_id', 'creator_name', 'video_id', 'game_id', 'language', 'title', 'view_count', 'created_at', 'thumbnail_url', 'duration', 'vod_offset', 'is_downloaded', 'file_path']
+                keys = ['id', 'url', 'embed_url', 'broadcaster_id', 'broadcaster_name', 
+                'creator_id', 'creator_name', 'video_id', 'game_id', 'language', 
+                'title', 'view_count', 'created_at', 'thumbnail_url', 'duration', 'vod_offset', 
+                'is_downloaded', 'file_path', 'is_fixed_for_YT','Youtube_URL','Youtube_timeline']
+
                 wr.writerow(keys)
                 f_clips.close()
 
@@ -415,7 +424,7 @@ if __name__ == '__main__':
             messagebox.showerror("치명적인 오류 발생", "알 수 없는 오류가 발생했습니다.\n 마지막으로 생성된 log 파일을 피드백 사이트에 보고해주세요")
 
         if not TAPI.boo:     
-            csv_error_log = [(st + timedelta(hours=9)).strftime("%Y-%m-%d %H:%M:%S")] + ['error']*17
+            csv_error_log = [(st + timedelta(hours=9)).strftime("%Y-%m-%d %H:%M:%S")] + ['error']*20
 
             f_clips = open(Clip_file,'a', encoding='UTF8',newline="")       
             wr = csv.writer(f_clips)

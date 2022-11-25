@@ -167,9 +167,11 @@ class Read_Clip_list_and_Downloader():
             #-> from urllib.request import urlretrieve 참조
             #-> 영상을 실제로 다운로드
             if folder_by_streamer:
-                urlretrieve(vid_url, directory + '/' + directory_date + '/['+vid_time+']'+vid_title+'.mp4')
+                tmp = urlretrieve(vid_url, directory + '/' + directory_date + '/['+vid_time+']'+vid_title+'.mp4')
+                del tmp
             else:
-                urlretrieve(vid_url, directory + '/['+vid_time+']'+vid_title+'.mp4')
+                tmp = urlretrieve(vid_url, directory + '/['+vid_time+']'+vid_title+'.mp4')
+                del tmp
 
             self.logger.info("클립 다운로드 완료")
 
@@ -212,5 +214,6 @@ class Read_Clip_list_and_Downloader():
 
 
         self.logger.info("모든 클립 다운로드가 완료되었습니다.")
+        self.logger.info("클립 다운로드용 크롬창 종료 중...")
         
         self.driver.close()

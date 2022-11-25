@@ -46,9 +46,6 @@ class Naver_Cafe_Clip_Gatherer():
         self.st_all = datetime.datetime.now()
         self.et_all = datetime.datetime.now()
 
-        #크롬 브라우저 실행
-        self.driver = webdriver.Chrome(ChromeDriverManager().install())
-
         self.st = st
 
         self.url = ''
@@ -392,8 +389,9 @@ class Naver_Cafe_Clip_Gatherer():
 
             Clip_links = []
 
-            #링크 찾기 - 1
-            datas = soup.find_all('a',class_='se-link')
+            # 링크 찾기
+            # se-line : 링크만, se-oglink-info : 섬네일 같이 있는 링크
+            datas = soup.find_all('a',class_=['se-link', 'se-oglink-info'])
 
             #트위치 클립 링크만 솎아내기
             for data in datas:
@@ -404,20 +402,20 @@ class Naver_Cafe_Clip_Gatherer():
                     #print("클립 주소 추가 : ",link)
                     self.logger.info("클립 주소 추가 : " + link)
 
-            #링크 찾기 - 2
-            datas = soup.find_all('a',class_='se-oglink-info')
-
-            #트위치 클립 링크만 솎아내기
-            for data in datas:
-                link = data.get('href')
-
-                if link.find('https://clips.twitch.tv/')>=0:
-                    Clip_links.append(link)
-                    #print("클립 주소 추가 : ",link)
-                    self.logger.info("클립 주소 추가 : " + link)
 
             # 중복 제거
-            Clip_links = list(set(Clip_links))
+            res = []
+            for i in Clip_links:
+                if i not in res:
+                    res.append(i)
+            Clip_links = res
+
+
+            # 게시글 링크 다시 받기
+            Copy_url_button = self.driver.find_element(By.CLASS_NAME,'button_url')
+            Copy_url_button.click()
+
+            new_page_Address = pyperclip.paste()
 
 
             # 게시글 정보 저장
@@ -431,8 +429,10 @@ class Naver_Cafe_Clip_Gatherer():
             directory = naver_title.lstrip().rstrip()
             directory = re.sub('[^0-9a-zA-Zㄱ-힗\s]', '_', directory)
 
+
+
             # id	URL	embed_url	broadcaster_id	broadcaster_name	creator_id	creator_name	video_id	game_id	language	title	view_count	created_at	thumbnail_url	duration	vod_offset	is_downloaded	file_path
-            article_log = ['네이버 게시글']*1 + [Page_Address] + ['x','0','x','0'] + [self.Writer_Name] + ['x','0','x'] + [naver_title.lstrip().rstrip()] + ['0','x','x','0',''] + ['T', os.getcwd() + '\\' + res_directory +'\\'+ directory + '\\']
+            article_log = ['네이버 게시글']*1 + [new_page_Address] + ['x','0','x','0'] + [self.Writer_Name] + ['x','0','x'] + [naver_title.lstrip().rstrip()] + ['0','x','x','0',''] + ['T', os.getcwd() + '\\' + res_directory +'\\'+ directory + '\\'] + ['T', 'https://', 0.0]
             wr.writerow(article_log)                    
                     
             f_clips.close()
@@ -477,6 +477,12 @@ class Naver_Cafe_Clip_Gatherer():
                 
                 clip_info['file_path'] = os.getcwd() + '\\' + res_directory +'\\'+ directory + '\\['+vid_time+']'+vid_title+'.mp4'
 
+                clip_info['is_fixed_for_YT'] = 'X'
+
+                clip_info['Youtube_URL'] = 'https://'
+
+                clip_info['Youtube_timeline'] = 0.0
+
                 clip_infos.append(clip_info)
                 self.logger.info("클립 정보 받기 완료 : " + clip_link)
 
@@ -497,7 +503,10 @@ class Naver_Cafe_Clip_Gatherer():
         # 설정 파일 읽기
         self.Read_config_file()
 
-        ### 네이버 카페 접속 ###        
+        ### 네이버 카페 접속 ###
+
+        #크롬 브라우저 실행
+        self.driver = webdriver.Chrome(ChromeDriverManager().install())
 
         ## 네이버 로그인 ##
         self.Naver_login()
@@ -587,7 +596,7 @@ if __name__ == '__main__':
         logger.error(traceback.format_exc())
 
         if not TAPI.boo:     
-            csv_error_log = [NCCG.st.strftime("%Y-%m-%d %H:%M:%S")] + ['error']*17
+            csv_error_log = [NCCG.st.strftime("%Y-%m-%d %H:%M:%S")] + ['error']*20
 
             f_clips = open(Clip_file,'a', encoding='UTF8',newline="")       
             wr = csv.writer(f_clips)
