@@ -22,7 +22,7 @@ class Twitch_API():
         # 아래 두 주소 참고해서 본인만의 키를 발급 받아 사용하세요 킹아!
         # https://dev.twitch.tv/docs/api/get-started
         # https://dev.twitch.tv/docs/authentication/getting-tokens-oauth/#oauth-client-credentials-flow
-        self.headers={'Authorization': '', 'client-id': ''}
+        self.headers={'Authorization': ' ', 'client-id': ''}
 
 
         # 스트리머별 ID

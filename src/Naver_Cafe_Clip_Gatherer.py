@@ -33,7 +33,7 @@ Hot_board_link = 'https://cafe.naver.com/steamindiegame?iframe_url=/ArticleList.
 
 class Naver_Cafe_Clip_Gatherer():
 
-    def __init__(self, Clip_file, config_file, logger, dt=86400*14, st=None):
+    def __init__(self, Clip_file, config_file, logger, driver, dt=86400*14, st=None):
         
         self.Clip_file = Clip_file
         self.config_file = config_file
@@ -54,6 +54,8 @@ class Naver_Cafe_Clip_Gatherer():
         self.Time_Split_Step_sec = dt
 
         self.time_list =[]
+
+        self.driver = driver
 
 
 
@@ -117,6 +119,7 @@ class Naver_Cafe_Clip_Gatherer():
         self.driver.get(url)
         time.sleep(2) #로딩 대기
 
+        ''' 아무리 편해도 개인정보 수집인데.. 다음 버전부턴 삭제
         #아이디 입력폼
         tag_id = self.driver.find_element(By.NAME,'id')
         #패스워드 입력폼
@@ -142,6 +145,12 @@ class Naver_Cafe_Clip_Gatherer():
         time.sleep(2)
 
         pyperclip.copy('')
+        '''
+
+        #while문은 로그인 완료까지 기다림
+        while self.driver.current_url.find('https://nid.naver.com/login/ext/deviceConfirm')<0:
+            time.sleep(1)    
+
 
     def Choose_Board(self):
 
@@ -390,7 +399,7 @@ class Naver_Cafe_Clip_Gatherer():
             Clip_links = []
 
             # 링크 찾기
-            # se-line : 링크만, se-oglink-info : 섬네일 같이 있는 링크
+            # se-link : 링크만, se-oglink-info : 섬네일 같이 있는 링크
             datas = soup.find_all('a',class_=['se-link', 'se-oglink-info'])
 
             #트위치 클립 링크만 솎아내기
@@ -401,6 +410,27 @@ class Naver_Cafe_Clip_Gatherer():
                     Clip_links.append(link)
                     #print("클립 주소 추가 : ",link)
                     self.logger.info("클립 주소 추가 : " + link)
+
+                # v0.4.0a 추가
+                else:
+                    # https://www.twitch.tv/{스트리머}/clip/{ID} 방식 주소 대응
+                    link_split = link.split('/')
+                    if link_split[2] == 'www.twitch.tv' and link_split[-2] == 'clip':
+                        
+                        link = 'https://clips.twitch.tv/' + link_split[-1] 
+
+                        Clip_links.append(link)
+                        #print("클립 주소 추가 : ",link)
+                        self.logger.info("클립 주소 추가 : " + link)
+
+            # v0.4.0a 추가
+            # 네이버 동영상 몇개 있는지 찾기
+            naver_vids = soup.find_all('div',class_='se-component se-video se-l-default')
+
+            nvid_count = 0
+
+            for i in naver_vids:
+                nvid_count =  nvid_count +1
 
 
             # 중복 제거
@@ -432,7 +462,7 @@ class Naver_Cafe_Clip_Gatherer():
 
 
             # id	URL	embed_url	broadcaster_id	broadcaster_name	creator_id	creator_name	video_id	game_id	language	title	view_count	created_at	thumbnail_url	duration	vod_offset	is_downloaded	file_path
-            article_log = ['네이버 게시글']*1 + [new_page_Address] + ['x','0','x','0'] + [self.Writer_Name] + ['x','0','x'] + [naver_title.lstrip().rstrip()] + ['0','x','x','0',''] + ['T', os.getcwd() + '\\' + res_directory +'\\'+ directory + '\\'] + ['T', 'https://', 0.0]
+            article_log = ['네이버 게시글']*1 + [new_page_Address] + ['x','0','x','0'] + [self.Writer_Name] + ['x',str(nvid_count),'x'] + [naver_title.lstrip().rstrip()] + ['0','x','x','0',''] + ['T', os.getcwd() + '\\' + res_directory +'\\'+ directory + '\\'] + ['T', 'https://', 0.0]
             wr.writerow(article_log)                    
                     
             f_clips.close()
@@ -496,6 +526,74 @@ class Naver_Cafe_Clip_Gatherer():
                 f_clips.close()
 
         #print(Clip_links)
+    
+    def Check_Duplication(self):
+
+        f_clips = open(self.Clip_file,'r', encoding='UTF8', newline="")
+
+        rdr = csv.reader(f_clips)
+
+        read_csv = list(rdr)
+
+        f_clips.close()
+
+        title_idx_list = []
+
+        idx = -1
+
+        # 맨 윗줄은 이름
+        read_csv.pop(0)
+
+        for res_list in read_csv:
+
+            idx = idx +1
+            
+            # is_downloaded 변수
+            if res_list[16] == 'T':
+                title_idx_list.append(idx)
+
+        article_list = []
+        for i in range(len(title_idx_list)-1):
+            article_list.append(read_csv[title_idx_list[i]:title_idx_list[i+1]])
+        article_list.append(read_csv[title_idx_list[-1]:])
+
+        idx_1 = -1
+        for i in article_list:
+            idx_1 = idx_1 + 1
+            idx_2 = -1
+            for j in article_list:
+                idx_2 = idx_2 + 1
+                # URL 변수
+                if i[0][1]==j[0][1]:
+                    self.logger.info("게시글 중복 감지 : " + i[0][10])
+                    more_clip = max(len(i),len(j))
+                    if more_clip == len(i):
+                        article_list.pop(idx_2)
+                        idx_2 = idx_2 - 1
+                    elif more_clip == len(j):
+                        article_list.pop(idx_1)
+                        idx_1 = idx_1 - 1
+                    else:
+                        self.logger.error("뭐여 이 부분은 어케 옴")
+                    self.logger.info("게시글 중복 제거 완료")
+
+        csv_list =[]
+        for i in article_list:
+            csv_list = csv_list + i
+
+        f_clips = open(self.Clip_file,'w', encoding='UTF8', newline="")       
+        wr = csv.writer(f_clips)
+        #keys = ['id', 'url', 'embed_url', 'broadcaster_id', 'broadcaster_name', 'creator_id', 'creator_name', 'video_id', 'game_id', 'language', 'title', 'view_count', 'created_at', 'thumbnail_url', 'duration', 'vod_offset', 'is_downloaded', 'file_path']
+        keys = ['id', 'url', 'embed_url', 'broadcaster_id', 'broadcaster_name', 
+        'creator_id', 'creator_name', 'video_id', 'game_id', 'language', 
+        'title', 'view_count', 'created_at', 'thumbnail_url', 'duration', 'vod_offset', 
+        'is_downloaded', 'file_path', 'is_fixed_for_YT','Youtube_URL','Youtube_timeline']
+
+        wr.writerow(keys)
+        wr.writerows(csv_list)
+       
+                
+        f_clips.close()
 
 
     def Run(self):
@@ -506,7 +604,7 @@ class Naver_Cafe_Clip_Gatherer():
         ### 네이버 카페 접속 ###
 
         #크롬 브라우저 실행
-        self.driver = webdriver.Chrome(ChromeDriverManager().install())
+        #self.driver = webdriver.Chrome(ChromeDriverManager().install())
 
         ## 네이버 로그인 ##
         self.Naver_login()
@@ -519,9 +617,10 @@ class Naver_Cafe_Clip_Gatherer():
 
         ## 네이버 카페 게시판 접속 및 게시글 주소 얻기 ##      
         for args in tqdm(self.time_list):
-
+            
             st = args[0]
-            et = args[1]                        
+            et = args[1]    
+            self.st = st                    
         
             # 검색 페이지 주소
             Page_Num_Address_list = self.Get_Board_Page_Num(st, et)
@@ -540,9 +639,13 @@ class Naver_Cafe_Clip_Gatherer():
 
 
         self.logger.info("클립 주소 수집 완료")
-        self.logger.info("왁물원용 크롬창 종료 중...")
+        #self.logger.info("왁물원용 크롬창 종료 중...")
 
-        self.driver.close()
+        self.logger.info("클립 주소 중복 정리 시작")
+        self.Check_Duplication()
+        self.logger.info("클립 주소 중복 정리 완료")
+
+        #self.driver.close()
 
         #self.TAPI.boo = True
         return True
@@ -572,13 +675,13 @@ if __name__ == '__main__':
     logger.info("시작")
     res_lists=[]
 
-    
+    driver = webdriver.Chrome(ChromeDriverManager().install())
 
     Clip_file = "Clip_list.csv"
     config_file = "config.txt"
 
     TAPI = Twitch_API(Clip_file, logger)
-    NCCG = Naver_Cafe_Clip_Gatherer(Clip_file, config_file, logger, Time_Split_Step_sec)
+    NCCG = Naver_Cafe_Clip_Gatherer(Clip_file, config_file, logger, driver, Time_Split_Step_sec)
 
     try:
         ### 클립 주소 목록 있는지 확인

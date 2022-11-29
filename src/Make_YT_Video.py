@@ -18,6 +18,8 @@ class Make_YT_Video():
 
         self.keys = []
         self.res_lists = []
+        self.ness = []
+
         self.driver = None
 
     def get_list(self):
@@ -126,6 +128,47 @@ class Make_YT_Video():
 
         self.logger.info("CSV 업데이트 완료")
 
+    def Check_Necessary(self):
+
+        clip_count = 0
+        title_dict_idx = 0
+        idx = -1
+
+        need2video_set =False
+
+        for res_list in self.res_lists:
+
+            idx = idx +1
+            
+            if res_list['is_downloaded'] == 'T':
+
+                if need2video_set == False:
+                    self.ness.append(-1)
+                    clip_count = 0
+                    need2video_set = True
+                    continue
+
+                self.ness[title_dict_idx] = clip_count + int(self.res_lists[title_dict_idx]['game_id'])
+
+                title_dict_idx = idx
+
+                clip_count = 0
+
+                self.ness.append(-1)
+                need2video_set = True
+
+            else:
+                self.ness.append(-1)
+                clip_count = clip_count + 1
+
+        self.ness[title_dict_idx] = clip_count + int(self.res_lists[title_dict_idx]['game_id'])
+
+        # 네이버 동영상이 10개 이상이 될 경우
+        for i in range(len(self.ness)):
+            if self.ness[i] > 10:
+                self.ness[i] = True
+            else:
+                self.ness[i] = False
 
 
     def Make_Video(self):
@@ -149,7 +192,12 @@ class Make_YT_Video():
                     already_procd = True
                     continue
                 else:
-                    already_procd = False
+                    if self.ness[idx]:
+                        already_procd = False
+                    else:
+                        self.logger.info("네이버 영상으로 올려도 됨 : " + res_list['file_path'])
+                        already_procd = True
+                        continue
                     
 
                 # 이 부분은 첫 루프엔 작동 안 함
@@ -170,6 +218,13 @@ class Make_YT_Video():
                 title_dir = re.sub('[^0-9a-zA-Zㄱ-힗\s]', '_', title)
                 article_url = res_list['url']
                 dir_ = res_list['file_path']
+
+                # v0.3.1 추가
+                if not os.path.exists(dir_):
+                    #os.mkdir(dir_ + title_dir)
+                    self.logger.warning("폴더가 존재하지 않습니다. : " + res_list['title'] + '\t이 게시글에는 클립이 없나보죠?')
+                    continue          
+
                 vid_name = dir_ + title_dir +'.mp4'
                 vid_name = '\"' + vid_name.replace('\\','/') + '\"'
                 timeline_file_dir = dir_ + title_dir +'-timeline.txt'
@@ -236,18 +291,20 @@ class Make_YT_Video():
                     self.logger.info("영상 리스트 추가 : " + title +'\t'+ res_list['title']) 
             
             
-
-        self.logger.info("유튭 영상 만들기 시작 : " + vid_name)
-        self.Make_description(timeline_file, video_timeline_info)
-        vid_concat(clip_list, vid_name)
-        self.Update_CSV(self.res_lists[title_dict_idx])
-        self.logger.info("유튭 영상 만들기 완료 : " + vid_name)
-        #delete_fixed_vid(clip_list)
+        if not already_procd and idx>-1:
+            self.logger.info("유튭 영상 만들기 시작 : " + vid_name)
+            self.Make_description(timeline_file, video_timeline_info)
+            vid_concat(clip_list, vid_name)
+            self.Update_CSV(self.res_lists[title_dict_idx])
+            self.logger.info("유튭 영상 만들기 완료 : " + vid_name)
+            #delete_fixed_vid(clip_list)
 
 
     def Run(self):
 
         self.get_list()
+
+        self.Check_Necessary()
 
         self.Make_Video()
 
