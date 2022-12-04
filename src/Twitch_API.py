@@ -22,7 +22,7 @@ class Twitch_API():
         # 아래 두 주소 참고해서 본인만의 키를 발급 받아 사용하세요 킹아!
         # https://dev.twitch.tv/docs/api/get-started
         # https://dev.twitch.tv/docs/authentication/getting-tokens-oauth/#oauth-client-credentials-flow
-        self.headers={'Authorization': ' ', 'client-id': ''}
+        self.headers={'Authorization': 'Bearer sev771hx6gxz7f9fso4utp5f1disxp', 'client-id': 'n0ngkqgxuek9p3fplo6uqxw5rv2gr1'}
 
 
         # 스트리머별 ID
@@ -251,17 +251,86 @@ class Twitch_API():
         return self.streamer_id, self.user_name, self.st_all, self.et_all
 
 
+    def load_config_streamer(self, argument, option):
+
+        ### config 파일 읽기
+
+        #f_conf = open('config.txt','r', encoding='UTF8')
+
+        #conf = f_conf.read().split('\n')
+
+        # 스트리머
+        streamer_name = argument[option]['streamer']
+
+        if streamer_name == '우왁굳':
+            self.streamer_id = self.wak_id
+        elif streamer_name == '아이네':
+            self.streamer_id = self.ine_id
+        elif streamer_name == '징버거':
+            self.streamer_id = self.jing_id
+        elif streamer_name == '릴파':
+            self.streamer_id = self.lilpa_id
+        elif streamer_name == '주르르':
+            self.streamer_id = self.jururu_id
+        elif streamer_name == '고세구':
+            self.streamer_id = self.segu_id
+        elif streamer_name == '비챤':
+            self.streamer_id = self.vii_id
+        else:
+            self.streamer_id = ''
+            self.logger.error('지원하지 않는 스트리머입니다. : ' + streamer_name)
+
+        # 자기 닉네임
+        self.user_name = argument[option]['user']
+
+        # 검색 시작 날짜
+        try:
+            st_string = argument[option]['startDate']
+
+            st_list = st_string.split(' ')  # 나누기
+            st_date = st_list[0].split('-') # 날짜
+            st_time = st_list[1].split(':') # 시간
+
+            st_all = datetime.datetime(int(st_date[0]), int(st_date[1]), int(st_date[2]), int(st_time[0]), int(st_time[1]), int(st_time[2]))
+            self.st_all = st_all - timedelta(hours=9)    # 트위치 서버는 UTC+0
+        except:
+            self.logger.error(traceback.format_exc())
+            self.logger.error('잘못된 검색 시작 날짜입니다. : ' + st_string)
+
+
+        # 검색 끝 날짜
+        try:
+            et_string = argument[option]['endDate']
+
+            et_list = et_string.split(' ')  # 나누기
+            et_date = et_list[0].split('-') # 날짜
+            et_time = et_list[1].split(':') # 시간
+
+            et_all = datetime.datetime(int(et_date[0]), int(et_date[1]), int(et_date[2]), int(et_time[0]), int(et_time[1]), int(et_time[2]))
+            self.et_all = et_all - timedelta(hours=9)    # 트위치 서버는 UTC+0
+        except:
+            self.logger.error(traceback.format_exc())
+            self.logger.error('잘못된 검색 끝 날짜입니다. : ' + et_string)
+
+        #f_conf.close()
+
+        return self.streamer_id, self.user_name, self.st_all, self.et_all
 
 
 
-    def Get_and_Save_Clip_list(self):
+
+    def Get_and_Save_Clip_list(self, from_file=True, arg='', opt=''):
 
         self.boo, st = self.check_saved_file()
 
         #if not os.path.exists(Clip_file):
         if not self.boo:
-            self.logger.info("cofing 파일 읽기")
-            self.read_config_file_streamer()
+            if from_file:
+                self.logger.info("cofing 파일 읽기")
+                self.read_config_file_streamer()
+            else:
+                self.logger.info("cofing 설정 읽기")
+                self.load_config_streamer(arg, opt)
 
             if st is not None:
                 self.st_all = datetime.datetime.strptime(st, "%Y-%m-%d %H:%M:%S") - timedelta(hours=9)

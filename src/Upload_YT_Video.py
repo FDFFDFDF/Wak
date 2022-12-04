@@ -177,9 +177,6 @@ class Upload_YT_Video:
                         while len(title)>100:
                             title = title[:-1]
 
-                        # 제목에 꺾쇠 괄호는 허용 안 함
-                        title = re.sub('<|>','_',title)
-
 
                         # 제목
                         while True:
@@ -213,9 +210,7 @@ class Upload_YT_Video:
                         # 디스크립션
                         description_file = open(res_list['file_path'] + re.sub('[^0-9a-zA-Zㄱ-힗\s]', '_', res_list['title']) + '-timeline.txt', 'r', encoding='UTF8')
 
-                        # 여기도 꺾쇠 괄호 허용 안 함
                         video_description = description_file.read()
-                        video_description = re.sub('<|>','_',video_description)
 
                         description_field = self.driver.find_element(By.XPATH, Constant.DESCRIPTION_CONTAINER)
                         description_field.click()
@@ -257,17 +252,13 @@ class Upload_YT_Video:
                             #in_process = status_container.text.find(Constant.UPLOADED) != -1
                             
                             soup = bs(self.driver.page_source, 'html.parser')
-                            status_container_list = soup.find_all('span',class_='progress-label style-scope ytcp-video-upload-progress')
-                            bool_list=[]
-                            for status_container in status_container_list:
-                                in_process = status_container.get_text().find(Constant.UPLOADED) != -1
-                                if in_process:
-                                    bool_list.append(False)
-                                    time.sleep(Constant.USER_WAITING_TIME)
-                                else:
-                                    bool_list.append(True)
-                            if False not in bool_list:
+                            status_container = soup.find('span',class_='progress-label style-scope ytcp-video-upload-progress')
+                            in_process = status_container.get_text().find(Constant.UPLOADED) != -1
+                            if in_process:
+                                time.sleep(Constant.USER_WAITING_TIME)
+                            else:
                                 break
+                        
 
                         time.sleep(Constant.USER_WAITING_TIME*3)
 
@@ -502,7 +493,7 @@ class Upload_YT_Video:
                 idx = idx + 1
                 time.sleep(0.05)
                 if idx>200:
-                    self.logger.error('타임아웃 에러 : ' + res_list['title'])
+                    logger.error('타임아웃 에러 : ' + res_list['title'])
 
                 continue
             break

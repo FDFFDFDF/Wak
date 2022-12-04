@@ -65,14 +65,19 @@ class Read_Clip_list_and_Downloader():
 
     def Download_Clips(self, folder_by_streamer=True):
 
+        i = -1
+        total = len(self.res_lists)
         for res_list in self.res_lists:
 
+            i = i + 1
             # 이미 다운로드된 클립은 패스
             if res_list['is_downloaded'] == 'O':
                 self.logger.info("이미 다운로드된 클립입니다. : " + res_list['file_path'])
+                self.logger.info('클립 다운로드 완료 %3d' % (100*(i+1)/total))
+                self.logger.info('전체 진행도 %3d' % (25 + 25*(i+1)/total))
                 continue
             elif res_list['is_downloaded'] == 'T':
-                self.logger.info("게시글 시작 : " + res_list['title'])
+                self.logger.info("게시글 시작 : " + res_list['title'] + ' 진행 중')
                 continue
 
             if folder_by_streamer:
@@ -176,7 +181,8 @@ class Read_Clip_list_and_Downloader():
                 tmp = urlretrieve(vid_url, directory + '/['+vid_time+']'+vid_title+'.mp4')
                 del tmp
 
-            self.logger.info("클립 다운로드 완료")
+            self.logger.info('클립 다운로드 완료 %3d' % (100*(i+1)/total))
+            self.logger.info('전체 진행도 %3d' % (25 + 25*(i+1)/total))
 
             self.Update_CSV(res_list, directory, directory_date, vid_time, vid_title, folder_by_streamer)
 

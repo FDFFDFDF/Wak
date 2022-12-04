@@ -28,7 +28,22 @@ TAPI = Twitch_API('', None)
 Mom_board_link = 'https://cafe.naver.com/steamindiegame?iframe_url=/ArticleList.nhn%3Fsearch.clubid=27842958%26search.menuid=350%26search.boardtype=L'
 # 이세돌 핫클립 게시판 링크
 Hot_board_link = 'https://cafe.naver.com/steamindiegame?iframe_url=/ArticleList.nhn%3Fsearch.clubid=27842958%26search.menuid=331%26search.boardtype=L'
+# 이세돌 자유 게시판 링크
+Free_board_link = 'https://cafe.naver.com/steamindiegame?iframe_url=/ArticleList.nhn%3Fsearch.clubid=27842958%26search.menuid=327%26search.boardtype=L'
+# 이세돌 NEWS 게시판 링크
+News_board_link = 'https://cafe.naver.com/steamindiegame?iframe_url=/ArticleList.nhn%3Fsearch.clubid=27842958%26search.menuid=347%26search.boardtype=L'
+# 이세돌 팬영상 게시판 링크
+Vid_board_link = 'https://cafe.naver.com/steamindiegame?iframe_url=/ArticleList.nhn%3Fsearch.clubid=27842958%26search.menuid=361%26search.boardtype=L'
+# 이세돌 유튭각 게시판 링크
+YouG_board_link = 'https://cafe.naver.com/steamindiegame?iframe_url=/ArticleList.nhn%3Fsearch.clubid=27842958%26search.menuid=349%26search.boardtype=L'
 
+# 고멤 핫클립 게시판 링크
+GHot_board_link = 'https://cafe.naver.com/steamindiegame?iframe_url=/ArticleList.nhn%3Fsearch.clubid=27842958%26search.menuid=489%26search.boardtype=L'
+
+# 우왁굳 핫클립 게시판 링크
+WHot_board_link = 'https://cafe.naver.com/steamindiegame?iframe_url=/ArticleList.nhn%3Fsearch.clubid=27842958%26search.menuid=66%26search.boardtype=L'
+# 왁스비 게시판 링크
+WXB_board_link = 'https://cafe.naver.com/steamindiegame?iframe_url=/ArticleList.nhn%3Fsearch.clubid=27842958%26search.menuid=428%26search.boardtype=L'
 
 
 class Naver_Cafe_Clip_Gatherer():
@@ -108,6 +123,54 @@ class Naver_Cafe_Clip_Gatherer():
         if self.st is not None:
             self.st_all = datetime.datetime.strptime(self.st, "%Y-%m-%d %H:%M:%S")
 
+    def Load_from_UI(self, argument, option):
+
+        ### config 파일 읽기
+        #f_conf = open('config.txt','r', encoding='UTF8')
+
+        #conf = f_conf.read().split('\n')
+
+        #id
+        #self.uid = conf[2][5:]
+        #pw
+        #self.upw = conf[3][5:]
+
+        # 게시판 종류
+        self.Board_type = argument[option]['board']
+
+        # 글 작성자
+        self.Writer_Name = argument[option]['user']
+
+        # 검색 시작 날짜
+        try:
+            st_all_text = argument[option]['startDate']
+
+            st_date = st_all_text.split('-') # 날짜
+
+            self.st_all = datetime.datetime(int(st_date[0]), int(st_date[1]), int(st_date[2]))
+
+        except:
+            self.logger.error(traceback.format_exc())
+            self.logger.error('잘못된 검색 시작 날짜입니다. : ' + st_all_text)
+
+        # 검색 끝 날짜
+        try:
+            et_all_text = argument[option]['endDate']
+
+            et_date = et_all_text.split('-') # 날짜
+
+            self.et_all = datetime.datetime(int(et_date[0]), int(et_date[1]), int(et_date[2]))
+
+        except:
+            self.logger.error(traceback.format_exc())
+            self.logger.error('잘못된 검색 끝 날짜입니다. : ' + et_all_text)
+
+
+
+        #f_conf.close()
+
+        if self.st is not None:
+            self.st_all = datetime.datetime.strptime(self.st, "%Y-%m-%d %H:%M:%S")
 
     def Naver_login(self):
     
@@ -119,7 +182,7 @@ class Naver_Cafe_Clip_Gatherer():
         self.driver.get(url)
         time.sleep(2) #로딩 대기
 
-        ''' 아무리 편해도 개인정보 수집인데.. 다음 버전부턴 삭제
+        '''#아무리 편해도 개인정보 수집인데.. 다음 버전부턴 삭제
         #아이디 입력폼
         tag_id = self.driver.find_element(By.NAME,'id')
         #패스워드 입력폼
@@ -149,7 +212,9 @@ class Naver_Cafe_Clip_Gatherer():
 
         #while문은 로그인 완료까지 기다림
         while self.driver.current_url.find('https://nid.naver.com/login/ext/deviceConfirm')<0:
-            time.sleep(1)    
+            self.logger.info("네이버 로그인 대기 중...")
+            time.sleep(1)
+
 
 
     def Choose_Board(self):
@@ -159,10 +224,46 @@ class Naver_Cafe_Clip_Gatherer():
             self.url = Mom_board_link
             self.logger.info("엄마 게시판 선택")
 
-        elif self.Board_type.find('핫클립')>=0:
+        elif self.Board_type.find('이세돌 | 핫클립')>=0:
             # 이세돌 핫클립 게시판 링크
             self.url = Hot_board_link
-            self.logger.info("핫클립 게시판 선택")
+            self.logger.info("이세돌 핫클립 게시판 선택")
+
+        elif self.Board_type.find('고멤 | 핫클립')>=0:
+            # 고멤 핫클립 게시판 링크
+            self.url = GHot_board_link
+            self.logger.info("고멤 핫클립 게시판 선택")
+
+        elif self.Board_type.find('우왁굳 | 핫클립')>=0:
+            # 우왁굳 핫클립 게시판 링크
+            self.url = WHot_board_link
+            self.logger.info("우왁굳 핫클립 게시판 선택")
+
+        elif self.Board_type.find('이세돌 | 자유게시판')>=0:
+            # 이세돌 자유 게시판 링크
+            self.url = Free_board_link
+            self.logger.info("이세돌 자유 게시판 선택")
+
+        elif self.Board_type.find('이세돌 | 팬영상')>=0:
+            # 이세돌 팬영상 게시판 링크
+            self.url = Vid_board_link
+            self.logger.info("이세돌 팬영상 게시판 선택")
+
+        elif self.Board_type.find('이세돌 | NEWS')>=0:
+            # 이세돌 뉴스 게시판 링크
+            self.url = News_board_link
+            self.logger.info("이세돌 NEWS 게시판 선택")
+
+        elif self.Board_type.find('아 오늘 방송 못봤는데')>=0:
+            # 왁스비 게시판 링크
+            self.url = WXB_board_link
+            self.logger.info("아 오늘 방송 못봤는데 게시판 선택")
+
+        elif self.Board_type.find('이세돌 오늘의 유튭각')>=0:
+            # 이세돌 유튭각 게시판 링크
+            self.url = YouG_board_link
+            self.logger.info("이세돌 유튭각 게시판 선택")          
+
         else:
             self.url = ''
             self.logger.error("잘못된 게시판 선택 : " + self.Board_type)
@@ -393,7 +494,7 @@ class Naver_Cafe_Clip_Gatherer():
 
             naver_title = soup.find('h3',class_='title_text').get_text()
             #print(naver_title)
-            self.logger.info(naver_title)
+            self.logger.info(naver_title + ' 진행 중')
 
 
             Clip_links = []
@@ -562,20 +663,21 @@ class Naver_Cafe_Clip_Gatherer():
             idx_1 = idx_1 + 1
             idx_2 = -1
             for j in article_list:
-                idx_2 = idx_2 + 1
-                # URL 변수
-                if i[0][1]==j[0][1]:
-                    self.logger.info("게시글 중복 감지 : " + i[0][10])
-                    more_clip = max(len(i),len(j))
-                    if more_clip == len(i):
-                        article_list.pop(idx_2)
-                        idx_2 = idx_2 - 1
-                    elif more_clip == len(j):
-                        article_list.pop(idx_1)
-                        idx_1 = idx_1 - 1
-                    else:
-                        self.logger.error("뭐여 이 부분은 어케 옴")
-                    self.logger.info("게시글 중복 제거 완료")
+                idx_2 = idx_2 + 1                
+                if not idx_1 == idx_2:
+                    # URL 변수
+                    if i[0][1]==j[0][1]:
+                        self.logger.info("게시글 중복 감지 : " + i[0][10])
+                        more_clip = max(len(i),len(j))
+                        if more_clip == len(i):
+                            article_list.pop(idx_2)
+                            idx_2 = idx_2 - 1
+                        elif more_clip == len(j):
+                            article_list.pop(idx_1)
+                            idx_1 = idx_1 - 1
+                        else:
+                            self.logger.error("뭐여 이 부분은 어케 옴")
+                        self.logger.info("게시글 중복 제거 완료")
 
         csv_list =[]
         for i in article_list:
@@ -599,7 +701,7 @@ class Naver_Cafe_Clip_Gatherer():
     def Run(self):
     
         # 설정 파일 읽기
-        self.Read_config_file()
+        #self.Read_config_file()
 
         ### 네이버 카페 접속 ###
 
@@ -636,6 +738,37 @@ class Naver_Cafe_Clip_Gatherer():
             
             # 게시글의 클립 주소 수집 및 저장
             self.Get_Clip_URL(Page_Address_list)
+
+
+        self.logger.info("클립 주소 수집 완료")
+        #self.logger.info("왁물원용 크롬창 종료 중...")
+
+        self.logger.info("클립 주소 중복 정리 시작")
+        self.Check_Duplication()
+        self.logger.info("클립 주소 중복 정리 완료")
+
+        #self.driver.close()
+
+        #self.TAPI.boo = True
+        return True
+
+    def Run2(self, page_list):
+        
+        # 설정 파일 읽기
+        #self.Read_config_file()
+
+        ### 네이버 카페 접속 ###
+
+        #크롬 브라우저 실행
+        #self.driver = webdriver.Chrome(ChromeDriverManager().install())
+
+        ## 네이버 로그인 ##
+        self.Naver_login()
+
+        Page_Address_list = page_list
+
+        # 게시글의 클립 주소 수집 및 저장
+        self.Get_Clip_URL(Page_Address_list)
 
 
         self.logger.info("클립 주소 수집 완료")
