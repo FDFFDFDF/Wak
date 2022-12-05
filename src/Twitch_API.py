@@ -48,7 +48,7 @@ class Twitch_API():
         self.streamer_id = ''
         self.user_name = ''
 
-
+        self.st = datetime.datetime.now()
 
         self.boo = False
 
@@ -285,32 +285,28 @@ class Twitch_API():
 
         # 검색 시작 날짜
         try:
-            st_string = argument[option]['startDate']
+            st_all_text = argument[option]['startDate']
 
-            st_list = st_string.split(' ')  # 나누기
-            st_date = st_list[0].split('-') # 날짜
-            st_time = st_list[1].split(':') # 시간
+            st_date = st_all_text.split('-') # 날짜
 
-            st_all = datetime.datetime(int(st_date[0]), int(st_date[1]), int(st_date[2]), int(st_time[0]), int(st_time[1]), int(st_time[2]))
+            st_all = datetime.datetime(int(st_date[0]), int(st_date[1]), int(st_date[2]))
             self.st_all = st_all - timedelta(hours=9)    # 트위치 서버는 UTC+0
         except:
             self.logger.error(traceback.format_exc())
-            self.logger.error('잘못된 검색 시작 날짜입니다. : ' + st_string)
+            self.logger.error('잘못된 검색 시작 날짜입니다. : ' + st_all_text)
 
 
         # 검색 끝 날짜
         try:
-            et_string = argument[option]['endDate']
+            et_all_text = argument[option]['endDate']
 
-            et_list = et_string.split(' ')  # 나누기
-            et_date = et_list[0].split('-') # 날짜
-            et_time = et_list[1].split(':') # 시간
+            et_date = et_all_text.split('-') # 날짜
 
-            et_all = datetime.datetime(int(et_date[0]), int(et_date[1]), int(et_date[2]), int(et_time[0]), int(et_time[1]), int(et_time[2]))
+            et_all = datetime.datetime(int(et_date[0]), int(et_date[1]), int(et_date[2]))
             self.et_all = et_all - timedelta(hours=9)    # 트위치 서버는 UTC+0
         except:
             self.logger.error(traceback.format_exc())
-            self.logger.error('잘못된 검색 끝 날짜입니다. : ' + et_string)
+            self.logger.error('잘못된 검색 끝 날짜입니다. : ' + et_all_text)
 
         #f_conf.close()
 
@@ -369,6 +365,8 @@ class Twitch_API():
 
                 st = args[0]
                 et = args[1]
+
+                self.st = st
 
                 log_text = (st + timedelta(hours=9)).strftime("%Y-%m-%d %H:%M:%S")+" ~ "+(et + timedelta(hours=9)).strftime("%Y-%m-%d %H:%M:%S")+" - 클립 정보 수집 시작"
                 self.logger.info(log_text)
@@ -437,7 +435,7 @@ class Twitch_API():
             if already_procd:
                 wr.writerow(list(res.values()))
             else:
-                wr.writerow(list(res.values())+['X','X:\\'])
+                wr.writerow(list(res.values())+['X','X:\\','X','https://',0.0])
 
             #f_clips.write(str(res)+'\n')
 

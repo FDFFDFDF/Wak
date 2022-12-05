@@ -101,6 +101,7 @@ if __name__ == '__main__':
             ### 클립 주소 목록 있는지 확인
             #TAPI.boo, st = TAPI.check_saved_file()
             NCCG.st = st
+            TAPI.st = st
 
             if not TAPI.boo:         
                 logger.info('%d 단계 진행 중' % 1)
@@ -113,14 +114,18 @@ if __name__ == '__main__':
                     TAPI.Get_and_Save_Clip_list(False, arg, opt_str)
 
                 logger.info("클립 주소 저장 완료\n 다음 실행 시 왁물원이 아닌 저장된 파일에서 클립을 불러옵니다.")
-                if opt_str == 'option1' or opt_str == 'option2':
-                    make_config_file(config_file, arg[opt_str]['YTMake'], arg[opt_str]['YTUpload'], opt_str)
+                
+                make_config_file(config_file, arg[opt_str]['YTMake'], arg[opt_str]['YTUpload'], opt_str)
+
                 TAPI.boo =True
 
 
             logger.info('전체 진행도 %3d' % 25)
 
-            RCLD.Run(folder_by_streamer=False)
+            if opt_str == 'option1' or opt_str == 'option2':
+                RCLD.Run(folder_by_streamer=False)
+            else:
+                RCLD.Run(folder_by_streamer=True)
             logger.info("모든 클립 다운로드가 완료되었습니다.")
             logger.info('전체 진행도 %3d' % 50)
 
@@ -143,8 +148,11 @@ if __name__ == '__main__':
         except:
             logger.error(traceback.format_exc())
 
-            if not TAPI.boo:     
-                csv_error_log = [NCCG.st.strftime("%Y-%m-%d %H:%M:%S")] + ['error']*20
+            if not TAPI.boo: 
+                if opt_str == 'option1' or opt_str == 'option2':    
+                    csv_error_log = [NCCG.st.strftime("%Y-%m-%d %H:%M:%S")] + ['error']*20
+                else:
+                    csv_error_log = [TAPI.st.strftime("%Y-%m-%d %H:%M:%S")] + ['error']*20
 
                 f_clips = open(Clip_file,'a', encoding='UTF8',newline="")       
                 wr = csv.writer(f_clips)
