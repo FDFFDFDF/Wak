@@ -7,6 +7,8 @@ from urllib.request import urlretrieve
 import os
 import csv
 
+from bs4 import BeautifulSoup as bs
+import json
 
 import datetime
 from datetime import timedelta
@@ -82,7 +84,7 @@ class Read_Clip_list_and_Downloader():
 
             if folder_by_streamer:
                 # 스트리머 이름으로 폴더 생성
-                directory = re.sub('[^0-9a-zA-Zㄱ-힗\s]', '_', res_list['broadcaster_name'])
+                directory = re.sub('[^0-9a-zA-Zㄱ-힗 ]', '_', res_list['broadcaster_name'])
 
                 # 폴더 존재 여부 확인 후 폴더 생성
                 if not os.path.exists(directory):
@@ -153,6 +155,7 @@ class Read_Clip_list_and_Downloader():
                 vid_url_element = self.driver.find_element(By.TAG_NAME,'video')
                 vid_url = vid_url_element.get_attribute('src')
 
+
                 if idx>=100:
                     break
 
@@ -168,7 +171,110 @@ class Read_Clip_list_and_Downloader():
             #logger.info(vid_date)
 
             #파일명엔 특수문자가 불가능. 전부 _로 치환
-            vid_title = re.sub('[^0-9a-zA-Zㄱ-힗\s]', '_', vid_title)
+            vid_title = re.sub('[^0-9a-zA-Zㄱ-힗 ]', '_', vid_title)
+            vid_time = re.sub('[^0-9a-zA-Zㄱ-힗\s]', '_', vid_time).replace('T','_').replace('Z','')
+            self.logger.info("클립 다운로드 시작 : " + vid_title + " " + vid_time)
+
+            #-> from urllib.request import urlretrieve 참조
+            #-> 영상을 실제로 다운로드
+            if folder_by_streamer:
+                tmp = urlretrieve(vid_url, directory + '/' + directory_date + '/['+vid_time+']'+vid_title+'.mp4')
+                del tmp
+            else:
+                tmp = urlretrieve(vid_url, directory + '/['+vid_time+']'+vid_title+'.mp4')
+                del tmp
+
+            self.logger.info('클립 다운로드 완료 %3d' % (100*(i+1)/total))
+            self.logger.info('전체 진행도 %3d' % (25 + 25*(i+1)/total))
+
+            self.Update_CSV(res_list, directory, directory_date, vid_time, vid_title, folder_by_streamer)
+
+    def Download_Clips_No_Browser(self, folder_by_streamer=True):
+
+        i = -1
+        total = len(self.res_lists)
+        for res_list in self.res_lists:
+
+            i = i + 1
+            # 이미 다운로드된 클립은 패스
+            if res_list['is_downloaded'] == 'O':
+                self.logger.info("이미 다운로드된 클립입니다. : " + res_list['file_path'])
+                self.logger.info('클립 다운로드 완료 %3d' % (100*(i+1)/total))
+                self.logger.info('전체 진행도 %3d' % (25 + 25*(i+1)/total))
+                continue
+            elif res_list['is_downloaded'] == 'T':
+                self.logger.info("게시글 시작 : " + res_list['title'] + ' 진행 중')
+                continue
+
+            if folder_by_streamer:
+                # 스트리머 이름으로 폴더 생성
+                directory = re.sub('[^0-9a-zA-Zㄱ-힗 ]', '_', res_list['broadcaster_name'])
+
+                # 폴더 존재 여부 확인 후 폴더 생성
+                if not os.path.exists(directory):
+                    os.mkdir(directory)
+
+                # 날짜별로 폴더 생성
+                vid_UTC0 = datetime.datetime.strptime(res_list['created_at'], "%Y-%m-%dT%H:%M:%SZ")
+                vid_UTC9 = vid_UTC0 + timedelta(hours=9)
+                vid_time = vid_UTC9.strftime("%Y-%m-%dT%H:%M:%SZ")
+                vid_date = vid_time[0:vid_time.find("T")]
+                directory_date= re.sub('[^0-9a-zA-Zㄱ-힗\s]', '_', vid_date)
+
+                # 폴더 존재 여부 확인 후 폴더 생성
+                if not os.path.exists(directory+'/'+ directory_date):
+                    os.mkdir(directory+'/'+ directory_date)
+
+            else:
+                # 결과 폴더 생성
+                res_directory = 'results'
+                # 폴더 존재 여부 확인 후 폴더 생성
+                if not os.path.exists(res_directory):
+                    os.mkdir(res_directory)
+
+                # 게시글 이름으로 폴더 생성
+                dir_text = res_list['file_path'].replace(os.getcwd(),'')
+                directory = dir_text.split('\\')[2]
+
+                directory = res_directory + '/' + directory
+
+                # 폴더 존재 여부 확인 후 폴더 생성
+                if not os.path.exists(directory):
+                    os.mkdir(directory)
+
+                # 날짜별로 폴더 생성
+                vid_UTC0 = datetime.datetime.strptime(res_list['created_at'], "%Y-%m-%dT%H:%M:%SZ")
+                vid_UTC9 = vid_UTC0 + timedelta(hours=9)
+                vid_time = vid_UTC9.strftime("%Y-%m-%dT%H:%M:%SZ")
+                vid_date = vid_time[0:vid_time.find("T")]
+                directory_date= re.sub('[^0-9a-zA-Zㄱ-힗\s]', '_', vid_date)
+
+
+            Clip_link = res_list['url']
+
+            #print("클립 접속 : ", Clip_link)
+            self.logger.info("클립 접속 : " + Clip_link)
+
+            # 클립 주소가 아닐 시 루프 넘어감
+            if Clip_link.find('https://clips.twitch.tv/')<0:
+                #print("!유효한 주소가 아닙니다 : ", Clip_link)
+                self.logger.warning("!유효한 주소가 아닙니다 : " + Clip_link)
+                continue
+
+            thumb_url = res_list['thumbnail_url']
+
+            jpg_txt_idx = thumb_url.find('-preview-')
+
+            vid_url = thumb_url[:jpg_txt_idx] + '.mp4'
+
+            # 제목 가져오기
+            vid_title = res_list['title']
+
+
+            #logger.info(vid_date)
+
+            #파일명엔 특수문자가 불가능. 전부 _로 치환
+            vid_title = re.sub('[^0-9a-zA-Zㄱ-힗 ]', '_', vid_title)
             vid_time = re.sub('[^0-9a-zA-Zㄱ-힗\s]', '_', vid_time).replace('T','_').replace('Z','')
             self.logger.info("클립 다운로드 시작 : " + vid_title + " " + vid_time)
 
@@ -206,7 +312,7 @@ class Read_Clip_list_and_Downloader():
         self.logger.info("CSV 업데이트 완료")
 
 
-    def Est_Download_time(self):
+    def Est_Download_time(self, isBrowser = True):
 
         clip_count = 0
         clip_length = 0
@@ -279,7 +385,7 @@ class Read_Clip_list_and_Downloader():
         self.logger.info('예상 다운로드 용량 : 약 ' + str(round(sum(self.est_DT)*0.73/1024,2)) + 'GB')
 
         if sum(self.est_DT)>0:
-            self.Speed_test(clip_count, sum(self.est_DT))
+            self.Speed_test(clip_count, sum(self.est_DT), isBrowser)
 
         # 남은 용량이 다운 받을 용량보다 적으면 경고
         import shutil
@@ -290,7 +396,7 @@ class Read_Clip_list_and_Downloader():
 
     
 
-    def Speed_test(self, count, l):
+    def Speed_test(self, count, l, isBrowser = True):
         from Twitch_API import Twitch_API        
 
         TAPI = Twitch_API('', None)
@@ -301,25 +407,38 @@ class Read_Clip_list_and_Downloader():
         # 실행 시간 측정 - 개당
         st = time.time()
 
-        TAPI.clip_search_by_id('RealPlayfulMarrowCoolCat-eyq7-nreFFYGNX1g')
+        res = TAPI.clip_search_by_id('RealPlayfulMarrowCoolCat-eyq7-nreFFYGNX1g')
 
         dt1 = time.time() - st
         
         st = time.time()
 
         # 실행 시간 측정 - 영상 길이 초당
-        # 주소 이동
-        self.driver.get(url)
+        if isBrowser:
+            
+            # 주소 이동
+            self.driver.get(url)
 
-        # 영상 정보 받기
-        vid_url = ''
-        idx = 0
-        while vid_url.find('https://')<0:                               #while문은 로딩이 덜 되을 떄를 대비 10초까지 기다림
-            time.sleep(0.1)                    
-            idx = idx + 1
+            # 영상 정보 받기
+            vid_url = ''
+            idx = 0
 
-            vid_url_element = self.driver.find_element(By.TAG_NAME,'video')
-            vid_url = vid_url_element.get_attribute('src')
+            while vid_url.find('https://')<0:                               #while문은 로딩이 덜 되을 떄를 대비 10초까지 기다림
+                time.sleep(0.1)                    
+                idx = idx + 1
+
+                
+                vid_url_element = self.driver.find_element(By.TAG_NAME,'video')
+                vid_url = vid_url_element.get_attribute('src')
+
+        else:
+
+            thumb_url = res[0]['thumbnail_url']
+
+            jpg_txt_idx = thumb_url.find('-preview-')
+
+            vid_url = thumb_url[:jpg_txt_idx] + '.mp4'
+
 
         urlretrieve(vid_url, 'test.mp4')
 
@@ -340,12 +459,12 @@ class Read_Clip_list_and_Downloader():
 
 
 
-    def Run(self, folder_by_streamer=True):
+    def Run(self, folder_by_streamer=True, isBrowser = True):
 
         ## 클립 주소 파일이 존재할 시 불러오기
         self.get_list()
 
-        self.Est_Download_time()
+        self.Est_Download_time(isBrowser)
 
         #크롬 실행
         #self.driver = webdriver.Chrome(ChromeDriverManager().install())
@@ -354,7 +473,10 @@ class Read_Clip_list_and_Downloader():
         #print('클립 다운로드를 시작합니다.')
         self.logger.info('클립 다운로드를 시작합니다.')
 
-        self.Download_Clips(folder_by_streamer)
+        if isBrowser:
+            self.Download_Clips(folder_by_streamer)
+        else:
+            self.Download_Clips_No_Browser(folder_by_streamer)
 
 
         self.logger.info("모든 클립 다운로드가 완료되었습니다.")
@@ -409,7 +531,8 @@ if __name__ == '__main__':
 
     try:
 
-        RCLD.Run(folder_by_streamer=False)
+        #RCLD.Run(folder_by_streamer=False)
+        RCLD.Run(False, False)
         logger.info("모든 클립 다운로드가 완료되었습니다.")
 
         logger.info("크롬 창 종료 중...")

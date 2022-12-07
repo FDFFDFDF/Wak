@@ -143,7 +143,7 @@ class Upload_YT_Video:
                         time.sleep(Constant.USER_WAITING_TIME)
 
                         # 업로드
-                        absolute_video_path = res_list['file_path'] + re.sub('[^0-9a-zA-Zㄱ-힗\s]', '_', res_list['title']) + '.mp4'
+                        absolute_video_path = res_list['file_path'] + re.sub('[^0-9a-zA-Zㄱ-힗 ]', '_', res_list['title']) + '.mp4'
 
                         # 파일 이름이 너무 길면 8.3 이름으로 전달하기
                         if len(absolute_video_path)>=260:
@@ -208,7 +208,7 @@ class Upload_YT_Video:
 
 
                         # 디스크립션
-                        description_file = open(res_list['file_path'] + re.sub('[^0-9a-zA-Zㄱ-힗\s]', '_', res_list['title']) + '-timeline.txt', 'r', encoding='UTF8')
+                        description_file = open(res_list['file_path'] + re.sub('[^0-9a-zA-Zㄱ-힗 ]', '_', res_list['title']) + '-timeline.txt', 'r', encoding='UTF8')
 
                         video_description = description_file.read()
 
@@ -430,7 +430,7 @@ class Upload_YT_Video:
 
         # 제목 제한 140글자인데.. 왜 59자까지만 받지? 한글을 3바이트로 계산하나?
         title = res_list['title']
-        while len(title)>59:
+        while len(title)>57:
             title = title[:-1]
         pyperclip.copy(title)
         Clip_title_box.send_keys(Keys.CONTROL, 'v')
@@ -493,7 +493,7 @@ class Upload_YT_Video:
                 idx = idx + 1
                 time.sleep(0.05)
                 if idx>200:
-                    logger.error('타임아웃 에러 : ' + res_list['title'])
+                    self.logger.error('타임아웃 에러 : ' + res_list['title'])
 
                 continue
             break

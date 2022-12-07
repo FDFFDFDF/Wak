@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>699</width>
-    <height>573</height>
+    <width>898</width>
+    <height>596</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -139,42 +139,86 @@
           <property name="bottomMargin">
            <number>9</number>
           </property>
-          <item row="0" column="0">
-           <layout class="QVBoxLayout" name="verticalLayout_2">
-            <property name="sizeConstraint">
-             <enum>QLayout::SetDefaultConstraint</enum>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="isBrowsercheckBox">
+            <property name="text">
+             <string>직접 클립 받기 (더 빠름, 클립 막혀도 뚫림)</string>
             </property>
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout">
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QScrollArea" name="scrollArea">
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Sunken</enum>
+            </property>
+            <property name="verticalScrollBarPolicy">
+             <enum>Qt::ScrollBarAlwaysOn</enum>
+            </property>
+            <property name="horizontalScrollBarPolicy">
+             <enum>Qt::ScrollBarAlwaysOff</enum>
+            </property>
+            <property name="sizeAdjustPolicy">
+             <enum>QAbstractScrollArea::AdjustToContentsOnFirstShow</enum>
+            </property>
+            <property name="widgetResizable">
+             <bool>true</bool>
+            </property>
+            <widget class="QWidget" name="scrollAreaWidgetContents_2">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>559</width>
+               <height>456</height>
+              </rect>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_5">
               <item>
-               <widget class="QLineEdit" name="address">
-                <property name="placeholderText">
-                 <string>게시글 주소</string>
+               <layout class="QVBoxLayout" name="verticalLayout_2">
+                <property name="sizeConstraint">
+                 <enum>QLayout::SetMinAndMaxSize</enum>
                 </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="removeBtn">
-                <property name="text">
-                 <string>삭제</string>
-                </property>
-               </widget>
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout">
+                  <item>
+                   <widget class="QLineEdit" name="address">
+                    <property name="placeholderText">
+                     <string>게시글 주소</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="removeBtn">
+                    <property name="text">
+                     <string>삭제</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="addBtn">
+                  <property name="text">
+                   <string>추가</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </item>
              </layout>
-            </item>
-            <item>
-             <widget class="QPushButton" name="addBtn">
-              <property name="text">
-               <string>추가</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
+            </widget>
+           </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QCheckBox" name="YTMakecheckBox_2">
+          <item row="3" column="0">
+           <widget class="QCheckBox" name="YTUploadcheckBox_2">
             <property name="text">
-             <string>유튜브 업로드용 영상 만들기</string>
+             <string>유튜브 업로드  및 유튜브 클립 생성</string>
             </property>
             <property name="checked">
              <bool>true</bool>
@@ -182,9 +226,9 @@
            </widget>
           </item>
           <item row="2" column="0">
-           <widget class="QCheckBox" name="YTUploadcheckBox_2">
+           <widget class="QCheckBox" name="YTMakecheckBox_2">
             <property name="text">
-             <string>유튜브 업로드  및 유튜브 클립 생성</string>
+             <string>유튜브 업로드용 영상 만들기</string>
             </property>
             <property name="checked">
              <bool>true</bool>
@@ -207,10 +251,10 @@
           <property name="bottomMargin">
            <number>200</number>
           </property>
-          <item row="3" column="0">
-           <widget class="QCheckBox" name="YTMakecheckBox">
+          <item row="5" column="0">
+           <widget class="QCheckBox" name="YTUploadcheckBox">
             <property name="text">
-             <string>유튭용 영상 만들기</string>
+             <string>유튜브 업로드 및 유튜브 클립 생성</string>
             </property>
             <property name="checked">
              <bool>true</bool>
@@ -325,9 +369,19 @@
            </layout>
           </item>
           <item row="4" column="0">
-           <widget class="QCheckBox" name="YTUploadcheckBox">
+           <widget class="QCheckBox" name="YTMakecheckBox">
             <property name="text">
-             <string>유튜브 업로드 및 유튜브 클립 생성</string>
+             <string>유튭용 영상 만들기</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QCheckBox" name="isBrowsercheckBox_2">
+            <property name="text">
+             <string>직접 클립 받기 (더 빠름, 클립 막혀도 뚫림)</string>
             </property>
             <property name="checked">
              <bool>true</bool>
@@ -456,6 +510,16 @@
              </layout>
             </item>
            </layout>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="isBrowsercheckBox_3">
+            <property name="text">
+             <string>직접 클립 받기 (더 빠름, 클립 막혀도 뚫림)</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>

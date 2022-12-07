@@ -77,6 +77,7 @@ class WindowClass(QMainWindow, main_ui) :
         # init UI
         self.setupUi(self)
         self.setWindowTitle('WakArk')
+        self.setWindowIcon(QIcon('./assets/icon.png'))
 
         # argument
         self.argument = {
@@ -95,10 +96,11 @@ class WindowClass(QMainWindow, main_ui) :
         self.option3.clicked.connect(lambda: self.selectOption(2))
 
         # address setting
-        self.addressLayout = self.verticalLayout_2
+        self.addressLayout = self.verticalLayout_2        
         self.address.textChanged.connect(self.checkAddresses)
         self.removeBtn.clicked.connect(lambda: self.removeLine(self.horizontalLayout))
         self.addBtn.clicked.connect(lambda: self.addLine(self.addressLayout.count() - 1))
+
 
         # addItems for ComboBox
         self.board.addItems(['이세돌 엄마', '이세돌 | 핫클립', '고멤 | 핫클립', '우왁굳 | 핫클립', '이세돌 | 자유게시판', '이세돌 | 팬영상', '이세돌 | NEWS', '아 오늘 방송 못봤는데', '이세돌 오늘의 유튭각'])
@@ -128,12 +130,23 @@ class WindowClass(QMainWindow, main_ui) :
             self.argument['option2']['YTUpload'] = (a[2] == '1')
             self.argument['option3']['YTMake'] = (a[1] == '1')
             self.argument['option3']['YTUpload'] = (a[2] == '1')
+            self.argument['option1']['isBrowser'] = (a[3] == '1')
+            self.argument['option2']['isBrowser'] = (a[3] == '1')
+            self.argument['option3']['isBrowser'] = (a[3] == '1')
             if not self.argument['option1']['YTMake']:
                 self.YTMakecheckBox_2.toggle()
-                self.YTMakecheckBox.toggle()
             if not self.argument['option1']['YTUpload']:
                 self.YTUploadcheckBox_2.toggle()
+            if not self.argument['option2']['YTMake']:
+                self.YTMakecheckBox.toggle()
+            if not self.argument['option2']['YTUpload']:
                 self.YTUploadcheckBox.toggle()
+            if not self.argument['option1']['isBrowser']:
+                self.isBrowsercheckBox.toggle()
+            if not self.argument['option2']['isBrowser']:
+                self.isBrowsercheckBox_2.toggle()
+            if not self.argument['option3']['isBrowser']:
+                self.isBrowsercheckBox_3.toggle()
             f.close()
 
         self.stackedWidget.setCurrentIndex(5 if isFileExist else 0)
@@ -290,6 +303,7 @@ class WindowClass(QMainWindow, main_ui) :
             self.argument['option1']['addressList'] = [lineEdit.text() for lineEdit in self.stackedWidget.widget(2).findChildren(QLineEdit)]
             self.argument['option1']['YTMake'] = self.YTMakecheckBox_2.isChecked()
             self.argument['option1']['YTUpload'] = self.YTUploadcheckBox_2.isChecked()
+            self.argument['option1']['isBrowser'] = self.isBrowsercheckBox.isChecked()
 
         # option2
         elif self.pageList[2] == 3:
@@ -299,6 +313,7 @@ class WindowClass(QMainWindow, main_ui) :
             self.argument['option2']['endDate'] = self.endDate.text()
             self.argument['option2']['YTMake'] = self.YTMakecheckBox.isChecked()
             self.argument['option2']['YTUpload'] = self.YTUploadcheckBox.isChecked()
+            self.argument['option2']['isBrowser'] = self.isBrowsercheckBox_2.isChecked()
 
         # option3
         else :
@@ -308,6 +323,7 @@ class WindowClass(QMainWindow, main_ui) :
             self.argument['option3']['endDate'] = self.endDate_2.text()
             self.argument['option3']['YTMake'] = False
             self.argument['option3']['YTUpload'] = False
+            self.argument['option3']['isBrowser'] = self.isBrowsercheckBox_3.isChecked()
 
     def startLoad(self):
         self.makeArgument()
