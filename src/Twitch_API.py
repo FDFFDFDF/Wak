@@ -214,8 +214,11 @@ class Twitch_API():
             self.streamer_id = ''
             self.logger.error('지원하지 않는 스트리머입니다. : ' + streamer_name)
 
+        self.logger.info('스트리머 : ' + streamer_name)
+
         # 자기 닉네임
         self.user_name = conf[4]
+        self.logger.info('트위치 닉네임 : ' + self.user_name)
 
         # 검색 시작 날짜
         try:
@@ -325,7 +328,7 @@ class Twitch_API():
                 self.logger.info("cofing 파일 읽기")
                 self.read_config_file_streamer()
             else:
-                self.logger.info("cofing 설정 읽기")
+                self.logger.info("UI 설정 읽기")
                 self.load_config_streamer(arg, opt)
 
             if st is not None:

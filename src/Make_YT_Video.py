@@ -215,7 +215,7 @@ class Make_YT_Video():
 
                 # 게시글 제목으로 영상 제목 설정
                 title = res_list['title']
-                title_dir = re.sub('[^0-9a-zA-Zㄱ-힗\s]', '_', title)
+                title_dir = re.sub('[^0-9a-zA-Zㄱ-힗 ]', '_', title)
                 article_url = res_list['url']
                 dir_ = res_list['file_path']
 

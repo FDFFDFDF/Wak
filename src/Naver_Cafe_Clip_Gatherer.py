@@ -36,6 +36,9 @@ News_board_link = 'https://cafe.naver.com/steamindiegame?iframe_url=/ArticleList
 Vid_board_link = 'https://cafe.naver.com/steamindiegame?iframe_url=/ArticleList.nhn%3Fsearch.clubid=27842958%26search.menuid=361%26search.boardtype=L'
 # 이세돌 유튭각 게시판 링크
 YouG_board_link = 'https://cafe.naver.com/steamindiegame?iframe_url=/ArticleList.nhn%3Fsearch.clubid=27842958%26search.menuid=349%26search.boardtype=L'
+# 이세돌 컨텐츠 게시판 링크
+Cont_board_link = 'https://cafe.naver.com/steamindiegame?iframe_url=/ArticleList.nhn%3Fsearch.clubid=27842958%26search.menuid=404%26search.boardtype=L'
+
 
 # 고멤 핫클립 게시판 링크
 GHot_board_link = 'https://cafe.naver.com/steamindiegame?iframe_url=/ArticleList.nhn%3Fsearch.clubid=27842958%26search.menuid=489%26search.boardtype=L'
@@ -209,10 +212,10 @@ class Naver_Cafe_Clip_Gatherer():
 
         pyperclip.copy('')
         '''
-
+        self.logger.info("네이버 로그인 대기 중...")
         #while문은 로그인 완료까지 기다림
-        while self.driver.current_url.find('https://nid.naver.com/login/ext/deviceConfirm')<0:
-            self.logger.info("네이버 로그인 대기 중...")
+        while self.driver.current_url.find('https://nid.naver.com/login/ext/deviceConfirm')<0 and self.driver.current_url.find('https://www.naver.com/')<0:
+            #self.logger.info("네이버 로그인 대기 중...")
             time.sleep(1)
 
 
@@ -262,7 +265,12 @@ class Naver_Cafe_Clip_Gatherer():
         elif self.Board_type.find('이세돌 오늘의 유튭각')>=0:
             # 이세돌 유튭각 게시판 링크
             self.url = YouG_board_link
-            self.logger.info("이세돌 유튭각 게시판 선택")          
+            self.logger.info("이세돌 유튭각 게시판 선택")         
+
+        elif self.Board_type.find('이세돌 컨텐츠용 게시판')>=0:
+            # 이세돌 컨텐츠 게시판 링크
+            self.url = Cont_board_link
+            self.logger.info("이세돌 컨텐츠용 게시판")   
 
         else:
             self.url = ''
@@ -545,7 +553,7 @@ class Naver_Cafe_Clip_Gatherer():
             # 게시글 링크 다시 받기
             Copy_url_button = self.driver.find_element(By.CLASS_NAME,'button_url')
             Copy_url_button.click()
-
+            time.sleep(0.05)
             new_page_Address = pyperclip.paste()
 
 

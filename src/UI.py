@@ -103,7 +103,7 @@ class WindowClass(QMainWindow, main_ui) :
 
 
         # addItems for ComboBox
-        self.board.addItems(['이세돌 엄마', '이세돌 | 핫클립', '고멤 | 핫클립', '우왁굳 | 핫클립', '이세돌 | 자유게시판', '이세돌 | 팬영상', '이세돌 | NEWS', '아 오늘 방송 못봤는데', '이세돌 오늘의 유튭각'])
+        self.board.addItems(['이세돌 엄마', '이세돌 | 핫클립', '고멤 | 핫클립', '우왁굳 | 핫클립', '이세돌 | 자유게시판', '이세돌 | 팬영상', '이세돌 | NEWS', '아 오늘 방송 못봤는데', '이세돌 오늘의 유튭각', '이세돌 컨텐츠용 게시판'])
         self.streamer.addItems(['우왁굳','아이네','징버거','릴파','주르르','고세구','비챤'])
 
         # set main_func

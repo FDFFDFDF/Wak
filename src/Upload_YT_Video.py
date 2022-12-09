@@ -14,7 +14,7 @@ logging.basicConfig()
 
 class Constant:
     """A class for storing constants for YoutubeUploader class"""
-    YOUTUBE_URL = 'https://www.youtube.com'
+    YOUTUBE_URL = 'https://www.youtube.com/'
     YOUTUBE_STUDIO_URL = 'https://studio.youtube.com'
     YOUTUBE_UPLOAD_URL = 'https://www.youtube.com/upload'
     USER_WAITING_TIME = 1
@@ -107,8 +107,16 @@ class Upload_YT_Video:
         while self.driver.current_url.find('https://myaccount.google.com/?utm_source=sign_in_no_continue')<0:
             time.sleep(1)                    
 
-        self.driver.get(Constant.YOUTUBE_URL)
-        time.sleep(Constant.USER_WAITING_TIME)
+        # 브랜드 계정 채널 선택
+        self.driver.get('https://www.youtube.com/channel_switcher')
+        messagebox.showinfo("계정 선택", "업로드에 사용할 브랜드 계정을 선택해주세요")
+
+
+        while self.driver.current_url != Constant.YOUTUBE_URL:
+            time.sleep(1)
+
+        #self.driver.get(Constant.YOUTUBE_URL)
+        #time.sleep(Constant.USER_WAITING_TIME)
         #self.driver.save_cookies()
 
     def Update_CSV(self, res_list, url):
@@ -163,9 +171,20 @@ class Upload_YT_Video:
                                     output_buf_size = needed
 
                             
+                        self.logger.info("유튭 영상 업로드 시작 : " + res_list['file_path'])
+                        # 업로드 주소 넣는 곳 찾기
+                        while True:
+                            try:
+                                upload_contents = self.driver.find_element(By.XPATH, Constant.INPUT_FILE_VIDEO)
+                                upload_contents.send_keys(absolute_video_path)
 
+                            except:
+                                time.sleep(0.05)
+                                continue
+                            break
 
-                        self.driver.find_element(By.XPATH, Constant.INPUT_FILE_VIDEO).send_keys(absolute_video_path)
+                        self.logger.info("업로드할 유튭 영상 경로 전달 완료 : " + res_list['file_path'])
+
                         #self.logger.debug('Attached video {}'.format(self.video_path))
 
                         #title_field = self.driver.find_element(By.ID, "select-files-button")
@@ -177,7 +196,7 @@ class Upload_YT_Video:
                         while len(title)>100:
                             title = title[:-1]
 
-
+                        self.logger.info("유튭 영상 제목 입력 : " + res_list['file_path'])
                         # 제목
                         while True:
                             try:
@@ -204,9 +223,10 @@ class Upload_YT_Video:
                                 continue
                             break
 
-                        self.logger.debug('The video title was set to \"{}\"'.format(res_list['title']))
+                        self.logger.info("유튭 영상 제목 입력 완료 : " + title)
 
 
+                        self.logger.info("유튭 영상 설명 입력 : " + res_list['file_path'])
                         # 디스크립션
                         description_file = open(res_list['file_path'] + re.sub('[^0-9a-zA-Zㄱ-힗 ]', '_', res_list['title']) + '-timeline.txt', 'r', encoding='UTF8')
 
@@ -219,13 +239,13 @@ class Upload_YT_Video:
                         time.sleep(Constant.USER_WAITING_TIME)
                         pyperclip.copy(video_description)
                         description_field.send_keys(Keys.CONTROL, 'v')
-                        self.logger.debug('The video description was set to \"{}\"'.format(video_description))
+                        self.logger.info("유튭 영상 설명 입력 완료 : " + video_description)
 
 
                         # 아동용 아님
                         kids_section = self.driver.find_element(By.XPATH, Constant.NOT_MADE_FOR_KIDS_CONTAINER)
                         kids_section.click()
-                        self.logger.debug('Selected \"{}\"'.format(Constant.NOT_MADE_FOR_KIDS_LABEL))
+                        self.logger.info("아동용 아님 : " + res_list['file_path'])
 
 
                         # 다음 버튼 연타
@@ -239,14 +259,17 @@ class Upload_YT_Video:
                         self.driver.find_element(By.ID, Constant.NEXT_BUTTON).click()
                         self.logger.debug('Clicked another {}'.format(Constant.NEXT_BUTTON))
 
+                        self.logger.info("페이지 넘어옴 : " + res_list['file_path'])
+
                         time.sleep(Constant.USER_WAITING_TIME)
 
                         # 일부 공개
                         unlisted_main_button = self.driver.find_element(By.NAME, Constant.UNLISTED_BUTTON)
                         unlisted_main_button.find_element(By.ID, Constant.RADIO_LABEL).click()
-                        self.logger.debug('Made the video {}'.format(Constant.UNLISTED_BUTTON))
+                        self.logger.info("일부 공개 : " + res_list['file_path'])
 
 
+                        self.logger.info("업로드 대기 시작 : " + res_list['file_path'])
                         # 업로드 끝날 때까지 대기                        
                         while True:
                             #in_process = status_container.text.find(Constant.UPLOADED) != -1
@@ -258,7 +281,7 @@ class Upload_YT_Video:
                                 time.sleep(Constant.USER_WAITING_TIME)
                             else:
                                 break
-                        
+                        self.logger.info("업로드 완료 : " + res_list['file_path'])
 
                         time.sleep(Constant.USER_WAITING_TIME*3)
 
@@ -266,9 +289,11 @@ class Upload_YT_Video:
                         video_url_element = soup.find('a',class_='style-scope ytcp-video-info')
                         video_url = video_url_element.get('href')
                         
+                        self.logger.info("주소 받기 완료 : " + res_list['file_path'] + '\t' + video_url)
 
                         done_button = self.driver.find_element(By.ID, Constant.DONE_BUTTON)
 
+                        self.logger.info("완료 버튼 누르기 : " + res_list['file_path'])
                         # Catch such error as
                         # "File is a duplicate of a video you have already uploaded"
                         if done_button.get_attribute('aria-disabled') == 'true':
@@ -280,9 +305,8 @@ class Upload_YT_Video:
                             #return False, None
 
                         done_button.click()
-                        self.logger.debug("Published the video with video_id = {}".format(video_url))
 
-                        self.logger.info("유튭 영상 업로드 완료 : " + res_list['file_path'] + '\t' + video_url)
+                        self.logger.info("유튭 영상 업로드 완료 : " + res_list['file_path'])
 
                         time.sleep(Constant.USER_WAITING_TIME)
                         self.logger.info("유튭 영상 정보 저장 : " + res_list['file_path'] + '\t' + video_url)
