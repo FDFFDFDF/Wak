@@ -82,7 +82,7 @@ if __name__ == '__main__':
         is_Win11 = False
 
     # 디버그용
-    is_Win11 = True
+    #is_Win11 = True
 
     ChromeDriverManager().install()
     # 크롬 실행 - 시크릿 모드로, 그냥 모드로 구글 로그인하면 방문 기록 박살남
