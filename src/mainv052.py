@@ -10,7 +10,8 @@
 #### pip install pyqt5             ####
 #######################################
 
-import os
+import os, sys
+import platform
 
 import logging
 import traceback
@@ -18,6 +19,7 @@ import datetime
 
 from webdriver_manager.chrome import ChromeDriverManager
 import undetected_chromedriver as uc
+
 
 import csv
 from tkinter import messagebox
@@ -68,8 +70,19 @@ if __name__ == '__main__':
     filehandler.setFormatter(formatter)
     logger.addHandler(filehandler)
 
+    logger.info(platform.platform())
+    logger.info(sys.getwindowsversion().build)
+    logger.info(platform.machine())
     logger.info("시작")
 
+    # 윈도우 버전 체크
+    if sys.getwindowsversion().build > 20000:
+        is_Win11 = True
+    else:
+        is_Win11 = False
+
+    # 디버그용
+    is_Win11 = True
 
     ChromeDriverManager().install()
     # 크롬 실행 - 시크릿 모드로, 그냥 모드로 구글 로그인하면 방문 기록 박살남
@@ -84,8 +97,8 @@ if __name__ == '__main__':
     config_file = "wakark.cf"
 
     TAPI = Twitch_API(Clip_file, logger)
-    RCLD = Read_Clip_list_and_Downloader(Clip_file, logger, driver)
-    NCCG = Naver_Cafe_Clip_Gatherer(Clip_file, config_file, logger, driver, Time_Split_Step_sec)
+    RCLD = Read_Clip_list_and_Downloader(Clip_file, logger, driver, isWin11 = is_Win11)
+    NCCG = Naver_Cafe_Clip_Gatherer(Clip_file, config_file, logger, driver, Time_Split_Step_sec, isWin11 = is_Win11)
     MYTV = Make_YT_Video(Clip_file, logger)
     UYTV = Upload_YT_Video(Clip_file, logger, driver)
 

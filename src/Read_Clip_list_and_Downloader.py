@@ -18,7 +18,7 @@ from tkinter import messagebox
 
 class Read_Clip_list_and_Downloader():
 
-    def __init__(self, Clip_file, logger, driver):
+    def __init__(self, Clip_file, logger, driver, isWin11=False):
 
         self.Clip_file = Clip_file
         self.logger = logger
@@ -28,6 +28,8 @@ class Read_Clip_list_and_Downloader():
         self.driver = driver
 
         self.est_DT = []
+
+        self.isWin11 = isWin11
 
 
     def get_list(self):
@@ -181,6 +183,15 @@ class Read_Clip_list_and_Downloader():
                 tmp = urlretrieve(vid_url, directory + '/' + directory_date + '/['+vid_time+']'+vid_title+'.mp4')
                 del tmp
             else:
+                # win 11은 경로 길이가 250자 넘어가면 안됨. 제목을 줄인다.
+                vid_dir = os.getcwd() + directory + '/['+vid_time+']'+vid_title+'.mp4'
+                while self.isWin11 and len(vid_dir)>=250:
+                    vid_title = vid_title[:-1]
+                    vid_dir = os.getcwd() + directory + '/['+vid_time+']'+vid_title+'.mp4'
+                    if len(vid_title)==0:
+                        self.logger.error("너무 긴 게시글 제목과 클립 제목 : " + os.getcwd() + directory + '/['+vid_time+']'+res_list['title']+'.mp4')
+                        break
+                    
                 tmp = urlretrieve(vid_url, directory + '/['+vid_time+']'+vid_title+'.mp4')
                 del tmp
 
@@ -284,6 +295,15 @@ class Read_Clip_list_and_Downloader():
                 tmp = urlretrieve(vid_url, directory + '/' + directory_date + '/['+vid_time+']'+vid_title+'.mp4')
                 del tmp
             else:
+                # win 11은 경로 길이가 250자 넘어가면 안됨. 제목을 줄인다.
+                vid_dir = os.getcwd() + '/' + directory + '/['+vid_time+']'+vid_title+'.mp4'
+                while self.isWin11 and len(vid_dir)>=250:
+                    vid_title = vid_title[:-1]
+                    vid_dir = os.getcwd() + '/' +  directory + '/['+vid_time+']'+vid_title+'.mp4'
+                    if len(vid_title)==0:
+                        self.logger.error("너무 긴 게시글 제목과 클립 제목 : " + os.getcwd()  + '/' +  directory + '/['+vid_time+']'+res_list['title']+'.mp4')
+                        break
+                    
                 tmp = urlretrieve(vid_url, directory + '/['+vid_time+']'+vid_title+'.mp4')
                 del tmp
 
@@ -525,7 +545,7 @@ if __name__ == '__main__':
     Clip_file = "Clip_list.csv"
     config_file = "config.txt"
 
-    RCLD = Read_Clip_list_and_Downloader(Clip_file, logger, driver)
+    RCLD = Read_Clip_list_and_Downloader(Clip_file, logger, driver, isWin11=True)
 
 
 

@@ -51,7 +51,7 @@ WXB_board_link = 'https://cafe.naver.com/steamindiegame?iframe_url=/ArticleList.
 
 class Naver_Cafe_Clip_Gatherer():
 
-    def __init__(self, Clip_file, config_file, logger, driver, dt=86400*14, st=None):
+    def __init__(self, Clip_file, config_file, logger, driver, dt=86400*14, st=None, isWin11=False):
         
         self.Clip_file = Clip_file
         self.config_file = config_file
@@ -67,6 +67,8 @@ class Naver_Cafe_Clip_Gatherer():
         self.st = st
 
         self.url = ''
+
+        self.isWin11 = isWin11
 
         # 쪼갤 시간 (초)
         self.Time_Split_Step_sec = dt
@@ -212,12 +214,13 @@ class Naver_Cafe_Clip_Gatherer():
 
         pyperclip.copy('')
         '''
+        
         self.logger.info("네이버 로그인 대기 중...")
         #while문은 로그인 완료까지 기다림
         while self.driver.current_url.find('https://nid.naver.com/login/ext/deviceConfirm')<0 and self.driver.current_url.find('https://www.naver.com/')<0:
             #self.logger.info("네이버 로그인 대기 중...")
             time.sleep(1)
-
+        self.logger.info("네이버 로그인 완료")
 
 
     def Choose_Board(self):
@@ -615,6 +618,16 @@ class Naver_Cafe_Clip_Gatherer():
 
                 
                 clip_info['file_path'] = os.getcwd() + '\\' + res_directory +'\\'+ directory + '\\['+vid_time+']'+vid_title+'.mp4'
+
+                # win 11은 경로 길이가 250자 넘어가면 안됨. 제목을 줄인다.
+                idx = -1
+                while self.isWin11 and len(clip_info['file_path'])>=250:
+                    clip_info['file_path'] = os.getcwd() + '\\' + res_directory +'\\'+ directory + '\\['+vid_time+']' + vid_title[:idx]+'.mp4'
+                    if len(vid_title[:idx])==0:
+                        self.logger.error("너무 긴 게시글 제목과 클립 제목 : " + os.getcwd() + '\\' + res_directory +'\\'+ directory + '\\['+vid_time+']'+vid_title+'.mp4')
+                        break
+                    idx = idx - 1
+                    
 
                 clip_info['is_fixed_for_YT'] = 'X'
 

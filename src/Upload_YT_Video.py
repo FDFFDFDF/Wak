@@ -109,7 +109,7 @@ class Upload_YT_Video:
 
         # 브랜드 계정 채널 선택
         self.driver.get('https://www.youtube.com/channel_switcher')
-        messagebox.showinfo("계정 선택", "업로드에 사용할 브랜드 계정을 선택해주세요")
+        messagebox.showinfo("계정 선택", "업로드에 사용할 유튜브 브랜드 계정을 선택해주세요")
 
 
         while self.driver.current_url != Constant.YOUTUBE_URL:
@@ -196,6 +196,9 @@ class Upload_YT_Video:
                         while len(title)>100:
                             title = title[:-1]
 
+                        # 제목에 꺾쇠 괄호는 허용 안 함
+                        title = re.sub('<|>','_',title)
+
                         self.logger.info("유튭 영상 제목 입력 : " + res_list['file_path'])
                         # 제목
                         while True:
@@ -230,7 +233,9 @@ class Upload_YT_Video:
                         # 디스크립션
                         description_file = open(res_list['file_path'] + re.sub('[^0-9a-zA-Zㄱ-힗 ]', '_', res_list['title']) + '-timeline.txt', 'r', encoding='UTF8')
 
+                        # 여기도 꺾쇠 괄호 허용 안 함
                         video_description = description_file.read()
+                        video_description = re.sub('<|>','_',video_description)
 
                         description_field = self.driver.find_element(By.XPATH, Constant.DESCRIPTION_CONTAINER)
                         description_field.click()

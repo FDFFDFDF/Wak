@@ -20,6 +20,8 @@ class Make_YT_Video():
         self.res_lists = []
         self.ness = []
 
+        #self.isWin11 = isWin11
+
         self.driver = None
 
     def get_list(self):
