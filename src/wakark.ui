@@ -20,7 +20,7 @@
       <item>
        <widget class="QStackedWidget" name="stackedWidget">
         <property name="currentIndex">
-         <number>2</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="page">
          <layout class="QGridLayout" name="gridLayout">
@@ -56,14 +56,14 @@
               </property>
               <property name="minimumSize">
                <size>
-                <width>177</width>
-                <height>217</height>
+                <width>150</width>
+                <height>200</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>177</width>
-                <height>217</height>
+                <width>150</width>
+                <height>200</height>
                </size>
               </property>
               <property name="text">
@@ -81,14 +81,14 @@
               </property>
               <property name="minimumSize">
                <size>
-                <width>177</width>
-                <height>217</height>
+                <width>150</width>
+                <height>200</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>177</width>
-                <height>217</height>
+                <width>150</width>
+                <height>200</height>
                </size>
               </property>
               <property name="text">
@@ -106,14 +106,14 @@
               </property>
               <property name="minimumSize">
                <size>
-                <width>177</width>
-                <height>217</height>
+                <width>150</width>
+                <height>200</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>177</width>
-                <height>217</height>
+                <width>150</width>
+                <height>200</height>
                </size>
               </property>
               <property name="text">

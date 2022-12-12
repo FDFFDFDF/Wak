@@ -325,22 +325,30 @@ class Naver_Cafe_Clip_Gatherer():
 
             break
         
-        # 글 작성자 검색
-        search_by = self.driver.find_element(By.ID,'divSearchBy')
+        # 로딩 대기
+        while True:
+            try:
+                # 글 작성자 검색
+                search_by = self.driver.find_element(By.ID,'divSearchBy')
 
-        search_by.click()
-        #time.sleep(1)
-        search_by_author = self.driver.find_element(By.XPATH,'/html/body/div[1]/div/div[7]/form/div[2]/ul/li[3]/a')
+                search_by.click()
+                #time.sleep(0.25)
+                search_by_author = self.driver.find_element(By.XPATH,'/html/body/div[1]/div/div[7]/form/div[2]/ul/li[3]/a')
 
-        search_by_author.click()
-        #time.sleep(1)
+                search_by_author.click()
+                #time.sleep(0.25)
 
-        search_box = self.driver.find_element(By.ID,'query')
+                search_box = self.driver.find_element(By.ID,'query')
 
-        search_box.click()
+                search_box.click()
 
-        pyperclip.copy(self.Writer_Name)
-        search_box.send_keys(Keys.CONTROL, 'v')
+                pyperclip.copy(self.Writer_Name)
+                search_box.send_keys(Keys.CONTROL, 'v')
+
+            except:
+                time.sleep(0.05)
+
+            break
 
         # 값이 반영될 때까지 대기
         while True:
@@ -529,7 +537,7 @@ class Naver_Cafe_Clip_Gatherer():
                     link_split = link.split('/')
                     if link_split[2] == 'www.twitch.tv' and link_split[-2] == 'clip':
                         
-                        link = 'https://clips.twitch.tv/' + link_split[-1] 
+                        link = 'https://clips.twitch.tv/' + link_split[-1]
 
                         Clip_links.append(link)
                         #print("클립 주소 추가 : ",link)
@@ -569,7 +577,7 @@ class Naver_Cafe_Clip_Gatherer():
             res_directory = 'results'
             # 게시글 제목
             directory = naver_title.lstrip().rstrip()
-            directory = re.sub('[^0-9a-zA-Zㄱ-힗\s]', '_', directory)
+            directory = re.sub('[^0-9a-zA-Zㄱ-힗 ]', '_', directory)
 
 
 
@@ -607,7 +615,7 @@ class Naver_Cafe_Clip_Gatherer():
 
                 # 클립 제목
                 vid_title = clip_info['title']
-                vid_title = re.sub('[^0-9a-zA-Zㄱ-힗\s]', '_', vid_title)
+                vid_title = re.sub('[^0-9a-zA-Zㄱ-힗 ]', '_', vid_title)
 
 
                 # 클립 날짜

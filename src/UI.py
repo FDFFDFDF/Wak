@@ -76,8 +76,12 @@ class WindowClass(QMainWindow, main_ui) :
 
         # init UI
         self.setupUi(self)
+        self.setFixedSize(800,600)
         self.setWindowTitle('WakArk')
         self.setWindowIcon(QIcon('./assets/icon.png'))
+
+        self.stackedWidget.widget(0).setStyleSheet('QWidget#page {border-image: url(./assets/대문.png)}')
+        self.stackedWidget.widget(1).setStyleSheet('QWidget#page_2 {border-image: url(./assets/background.png)}')
 
         # argument
         self.argument = {
@@ -211,10 +215,10 @@ class WindowClass(QMainWindow, main_ui) :
     def selectOption(self, index):
         self.pageList[2] = index + 2
 
-        Main_image = self.stackedWidget.widget(0).findChildren(QLabel)[0]
+        #Main_image = self.stackedWidget.widget(0).findChildren(QLabel)[0]
 
-        pixmap = QPixmap('./assets/title.png')
-        Main_image.setPixmap(pixmap.scaledToWidth(640))
+        #pixmap = QPixmap('./assets/title.png')
+        #Main_image.setPixmap(pixmap.scaledToWidth(640))
 
 
         for i in range(3):
