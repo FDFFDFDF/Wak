@@ -2,6 +2,11 @@ from selenium.webdriver.common.keys import Keys
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver import ActionChains
+
+
 from bs4 import BeautifulSoup as bs
 import pyperclip
 import time
@@ -22,6 +27,20 @@ from Twitch_API import Twitch_API
 
 TAPI = Twitch_API('', None)
 
+keys = ['id', 'url', 'embed_url', 'broadcaster_id', 'broadcaster_name', 
+        'creator_id', 'creator_name', 'video_id', 'game_id', 'language', 
+        'title', 'view_count', 'created_at', 'thumbnail_url', 'duration', 'vod_offset', 
+        'is_downloaded', 'file_path', 'is_fixed_for_YT','Youtube_URL','Youtube_timeline']
+
+empty_dict ={}
+
+for k in keys:
+    if k in ['broadcaster_id', 'creator_id', 'video_id', 'game_id', 'view_count', 'duration']:
+        empty_dict[k] = 0
+    else:
+        empty_dict[k] = 'x'
+
+empty_dict['created_at'] = '1900-01-01T00:00:00Z'
 
 
 # 이세돌 엄마 게시판 링크
@@ -65,6 +84,7 @@ class Naver_Cafe_Clip_Gatherer():
         self.et_all = datetime.datetime.now()
 
         self.st = st
+        self.Page_Adrees_idx = 0
 
         self.url = ''
 
@@ -76,6 +96,7 @@ class Naver_Cafe_Clip_Gatherer():
         self.time_list =[]
 
         self.driver = driver
+        self.AC = ActionChains(driver)
 
 
 
@@ -478,7 +499,9 @@ class Naver_Cafe_Clip_Gatherer():
     def Get_Clip_URL(self, Page_Address_list):        
 
         ## 네이버 카페 게시글 접속 및 클립 주소 얻기 ##         
-        for Page_Address in Page_Address_list:
+        for PA_idx in range(self.Page_Adrees_idx, len(Page_Address_list)):
+            
+            Page_Address = Page_Address_list[PA_idx]
 
             #페이지 이동
             self.driver.get(Page_Address)
@@ -588,9 +611,41 @@ class Naver_Cafe_Clip_Gatherer():
             f_clips.close()
 
 
+            
+
+            # v1.1.0 추가 글쓰기 페이지로 이동
+            self.logger.info('게시글 작성 접속 : ' + new_page_Address + '\t' + naver_title.lstrip().rstrip())
+            self.driver.get('https://cafe.naver.com/ca-fe/cafes/27842958/articles/write?boardType=L')
+
+
+            # 게시글 나타날 때까지 대기
+            article_len = 0
+            while True:
+                try:                        
+                    soup = bs(self.driver.page_source, 'html.parser')
+                    container = soup.find('article', class_='se-components-wrap')
+                    lines = container.find_all('div', class_='se-component')
+
+                    if len(lines) > article_len:
+                        article_len = len(lines)
+                    else:
+                        break
+                    time.sleep(1)
+
+                except:
+                    time.sleep(0.05)
+                    continue
+                break      
+            # v1.1.0 추가 글쓰기 페이지로 이동 끝
+
             # 클립 정보 받기
             clip_infos = []
             for clip_link in Clip_links:
+
+
+                #12월 13일 오전 9시 사망
+                byebyeTwitch = False
+
                 # 트위치 서버에 리퀘스트
                 self.logger.info("클립 정보 받기 : " + clip_link)
                 clip_id = re.split('[/&?]',clip_link)[3]
@@ -599,9 +654,92 @@ class Naver_Cafe_Clip_Gatherer():
                 if len(clip_info_list)>0:
                     clip_info = clip_info_list[0]
                 else:
-                    self.logger.error("클립 정보 에러 : " + clip_link)
-                    continue
+                    self.logger.info("트위치 서버 접속 불가 : " + clip_link + "\t 네이버에서 클립 정보를 가져옵니다.")
+                    byebyeTwitch = True
+                    #continue
                 
+
+
+                if byebyeTwitch:
+
+                    # 딕셔너리 설정
+                    clip_info = empty_dict
+
+                    clip_info['id'] = clip_id
+                    clip_info['url'] = clip_link
+                    clip_info['embed_url'] = '네이버에서 가져온 클립 정보'
+                    clip_info['language'] = 'ko'
+
+                    # 게시글 작성란에 클립 넣기
+                    t = self.driver.find_element(By.CLASS_NAME, 'se-component-content')  
+
+                    self.AC.click(t).perform()
+                    time.sleep(0.1)
+
+                    pyperclip.copy(clip_link)
+                    time.sleep(0.1)
+                    self.AC.key_down(Keys.CONTROL)
+                    self.AC.send_keys('v')
+                    self.AC.key_up(Keys.CONTROL).perform()
+
+                    # 섬네일 나타날 때까지 대기
+                    isdeleted = False
+                    while True:
+                        try:
+                            # 섬네일 정보 찾기
+                            generated_thumb_info = self.driver.find_elements(By.CLASS_NAME, 'se-oglink-info-container')
+
+                            if len(generated_thumb_info)>0:
+
+                                # 클립 삭제 여부 확인
+                                thumb_summary = generated_thumb_info[0].find_elements(By.CLASS_NAME, 'se-oglink-summary')
+
+                                if len(thumb_summary)>0:
+                                    if thumb_summary[0].text == 'Twitch는 세계 최고의 동영상 플랫폼이자 게이머를 위한 커뮤니티입니다.':
+                                        isdeleted = True
+
+                                    break
+
+                        except:
+                            time.sleep(0.05)
+                            continue
+
+                    if isdeleted:
+                        self.logger.error("클립이 삭제되었습니다. : " + clip_link)
+                        continue
+
+                    
+                    while True:
+                        try:                   
+                            # 섬네일 이미지 찾기
+                            generated_thumb = self.driver.find_elements(By.CLASS_NAME, 'se-oglink-thumbnail-resource')                        
+
+                            if len(generated_thumb)>0:
+                                generated_thumb = generated_thumb[0]
+                                break
+                        except:
+                            time.sleep(0.05)
+                            continue                        
+                    
+                    alt = generated_thumb.get_attribute('alt')
+
+                    clip_info['broadcaster_name'] = alt[:alt.find(' - ')]
+                    clip_info['title'] = alt[alt.find(' - ') + 3:]
+
+                    thumb_src = generated_thumb.get_attribute('src')
+
+                    thumb_url = thumb_src[thumb_src.find('https://clips-media-assets2.twitch.tv'):]
+
+
+                    clip_info['thumbnail_url'] = thumb_url.replace('%257','%7')
+
+                    self.AC.click(generated_thumb).perform()
+                    self.AC.key_down(Keys.CONTROL)
+                    self.AC.send_keys('a')
+                    self.AC.key_up(Keys.CONTROL).perform()
+                    self.AC.send_keys(Keys.DELETE).perform()
+
+
 
                 clip_info['is_downloaded'] = 'X'
 
@@ -654,6 +792,19 @@ class Naver_Cafe_Clip_Gatherer():
                 wr.writerow(list(clip_info.values()))
                         
                 f_clips.close()
+
+                self.Page_Adrees_idx = self.Page_Adrees_idx + 1
+
+
+            self.driver.get('about:blank')
+            try:
+                WebDriverWait(self.driver, 3).until(EC.alert_is_present())
+                alert = self.driver.switch_to.alert
+
+                alert.accept()
+            except:
+                pass
+
 
         #print(Clip_links)
     

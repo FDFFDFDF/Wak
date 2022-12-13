@@ -276,7 +276,12 @@ class Read_Clip_list_and_Downloader():
 
             jpg_txt_idx = thumb_url.find('-preview-')
 
+            if not jpg_txt_idx >= 0:
+                jpg_txt_idx = thumb_url.find('-social-preview.jpg')
+
             vid_url = thumb_url[:jpg_txt_idx] + '.mp4'
+            
+
 
             # 제목 가져오기
             vid_title = res_list['title']
