@@ -15,6 +15,18 @@ from datetime import timedelta
 
 from tkinter import messagebox
 
+import requests
+
+
+def DownloadWithVPN(vid_url, vid_name):
+
+    viddata = requests.post('https://reqproxy.wakarkproxyworkers.workers.dev/', data=vid_url)
+
+    f = open(vid_name,'wb')
+    f.write(viddata.content)
+    f.close()
+
+
 
 class Read_Clip_list_and_Downloader():
 
@@ -30,6 +42,8 @@ class Read_Clip_list_and_Downloader():
         self.est_DT = []
 
         self.isWin11 = isWin11
+
+        self.isVPN = False
 
 
     def get_list(self):
@@ -180,8 +194,12 @@ class Read_Clip_list_and_Downloader():
             #-> from urllib.request import urlretrieve 참조
             #-> 영상을 실제로 다운로드
             if folder_by_streamer:
-                tmp = urlretrieve(vid_url, directory + '/' + directory_date + '/['+vid_time+']'+vid_title+'.mp4')
-                del tmp
+                if not self.isVPN:
+                    tmp = urlretrieve(vid_url, directory + '/' + directory_date + '/['+vid_time+']'+vid_title+'.mp4')
+                    del tmp
+                else: 
+                    DownloadWithVPN(vid_url, directory + '/' + directory_date + '/['+vid_time+']'+vid_title+'.mp4')
+                
             else:
                 # win 11은 경로 길이가 250자 넘어가면 안됨. 제목을 줄인다.
                 vid_dir = os.getcwd() + directory + '/['+vid_time+']'+vid_title+'.mp4'
@@ -191,9 +209,13 @@ class Read_Clip_list_and_Downloader():
                     if len(vid_title)==0:
                         self.logger.error("너무 긴 게시글 제목과 클립 제목 : " + os.getcwd() + directory + '/['+vid_time+']'+res_list['title']+'.mp4')
                         break
-                    
-                tmp = urlretrieve(vid_url, directory + '/['+vid_time+']'+vid_title+'.mp4')
-                del tmp
+
+                if not self.isVPN:    
+                    tmp = urlretrieve(vid_url, directory + '/['+vid_time+']'+vid_title+'.mp4')
+                    del tmp
+                else:
+                    DownloadWithVPN(vid_url, directory + '/['+vid_time+']'+vid_title+'.mp4')
+
 
             self.logger.info('클립 다운로드 완료 %3d' % (100*(i+1)/total))
             self.logger.info('전체 진행도 %3d' % (25 + 25*(i+1)/total))
@@ -297,8 +319,12 @@ class Read_Clip_list_and_Downloader():
             #-> from urllib.request import urlretrieve 참조
             #-> 영상을 실제로 다운로드
             if folder_by_streamer:
-                tmp = urlretrieve(vid_url, directory + '/' + directory_date + '/['+vid_time+']'+vid_title+'.mp4')
-                del tmp
+                if not self.isVPN:
+                    tmp = urlretrieve(vid_url, directory + '/' + directory_date + '/['+vid_time+']'+vid_title+'.mp4')
+                    del tmp
+                else:
+                    DownloadWithVPN(vid_url, directory + '/' + directory_date + '/['+vid_time+']'+vid_title+'.mp4')
+
             else:
                 # win 11은 경로 길이가 250자 넘어가면 안됨. 제목을 줄인다.
                 vid_dir = os.getcwd() + '/' + directory + '/['+vid_time+']'+vid_title+'.mp4'
@@ -309,8 +335,11 @@ class Read_Clip_list_and_Downloader():
                         self.logger.error("너무 긴 게시글 제목과 클립 제목 : " + os.getcwd()  + '/' +  directory + '/['+vid_time+']'+res_list['title']+'.mp4')
                         break
                     
-                tmp = urlretrieve(vid_url, directory + '/['+vid_time+']'+vid_title+'.mp4')
-                del tmp
+                if not self.isVPN:
+                    tmp = urlretrieve(vid_url, directory + '/['+vid_time+']'+vid_title+'.mp4')
+                    del tmp
+                else:
+                    DownloadWithVPN(vid_url, directory + '/['+vid_time+']'+vid_title+'.mp4')
 
             self.logger.info('클립 다운로드 완료 %3d' % (100*(i+1)/total))
             self.logger.info('전체 진행도 %3d' % (25 + 25*(i+1)/total))
@@ -426,6 +455,9 @@ class Read_Clip_list_and_Downloader():
 
         TAPI = Twitch_API('', None)
 
+        if self.isVPN:
+            TAPI.proxy = True
+
         url = 'https://clips.twitch.tv/RealPlayfulMarrowCoolCat-eyq7-nreFFYGNX1g'
         id = 'RealPlayfulMarrowCoolCat-eyq7-nreFFYGNX1g'
 
@@ -464,8 +496,11 @@ class Read_Clip_list_and_Downloader():
 
             vid_url = thumb_url[:jpg_txt_idx] + '.mp4'
 
-
-        urlretrieve(vid_url, 'test.mp4')
+        if not self.isVPN:
+            urlretrieve(vid_url, 'test.mp4')
+        else:
+            DownloadWithVPN(vid_url, 'test.mp4')
+           
 
         dt2 = time.time() - st
         
@@ -484,10 +519,12 @@ class Read_Clip_list_and_Downloader():
 
 
 
-    def Run(self, folder_by_streamer=True, isBrowser = True):
+    def Run(self, folder_by_streamer=True, isBrowser = True, isVPN = False):
 
         ## 클립 주소 파일이 존재할 시 불러오기
         self.get_list()
+
+        self.isVPN = isVPN
 
         self.Est_Download_time(isBrowser)
 

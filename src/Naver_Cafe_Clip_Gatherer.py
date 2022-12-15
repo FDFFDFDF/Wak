@@ -25,7 +25,7 @@ import os
 #내가 싼 라이브러리
 from Twitch_API import Twitch_API
 
-TAPI = Twitch_API('', None)
+
 
 keys = ['id', 'url', 'embed_url', 'broadcaster_id', 'broadcaster_name', 
         'creator_id', 'creator_name', 'video_id', 'game_id', 'language', 
@@ -97,6 +97,8 @@ class Naver_Cafe_Clip_Gatherer():
 
         self.driver = driver
         self.AC = ActionChains(driver)
+
+        self.TAPI = Twitch_API('', None)
 
 
 
@@ -612,7 +614,7 @@ class Naver_Cafe_Clip_Gatherer():
 
 
             
-
+            ''' 12월 14일 사망
             # v1.1.0 추가 글쓰기 페이지로 이동
             self.logger.info('게시글 작성 접속 : ' + new_page_Address + '\t' + naver_title.lstrip().rstrip())
             self.driver.get('https://cafe.naver.com/ca-fe/cafes/27842958/articles/write?boardType=L')
@@ -637,7 +639,7 @@ class Naver_Cafe_Clip_Gatherer():
                     continue
                 break      
             # v1.1.0 추가 글쓰기 페이지로 이동 끝
-
+            '''
             # 클립 정보 받기
             clip_infos = []
             for clip_link in Clip_links:
@@ -649,17 +651,18 @@ class Naver_Cafe_Clip_Gatherer():
                 # 트위치 서버에 리퀘스트
                 self.logger.info("클립 정보 받기 : " + clip_link)
                 clip_id = re.split('[/&?]',clip_link)[3]
-                clip_info_list = TAPI.clip_search_by_id(clip_id)
+                clip_info_list = self.TAPI.clip_search_by_id(clip_id)
 
                 if len(clip_info_list)>0:
                     clip_info = clip_info_list[0]
                 else:
-                    self.logger.info("트위치 서버 접속 불가 : " + clip_link + "\t 네이버에서 클립 정보를 가져옵니다.")
-                    byebyeTwitch = True
-                    #continue
+                    #self.logger.info("트위치 서버 접속 불가 : " + clip_link + "\t 네이버에서 클립 정보를 가져옵니다.")
+                    #byebyeTwitch = True
+                    self.logger.error("클립이 삭제되었습니다. : " + clip_link + '\t' + new_page_Address)
+                    continue
                 
 
-
+                #12월 14일 사망
                 if byebyeTwitch:
 
                     # 딕셔너리 설정

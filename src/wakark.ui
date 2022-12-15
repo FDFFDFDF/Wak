@@ -20,7 +20,7 @@
       <item>
        <widget class="QStackedWidget" name="stackedWidget">
         <property name="currentIndex">
-         <number>1</number>
+         <number>4</number>
         </property>
         <widget class="QWidget" name="page">
          <layout class="QGridLayout" name="gridLayout">
@@ -140,9 +140,9 @@
            <number>9</number>
           </property>
           <item row="1" column="0">
-           <widget class="QCheckBox" name="isBrowsercheckBox">
+           <widget class="QCheckBox" name="isVPNcheckBox">
             <property name="text">
-             <string>직접 클립 받기 (더 빠름, 클립 막혀도 뚫림)</string>
+             <string>해외 IP로 클립 받기 (WAK ARK 전용 서버)</string>
             </property>
             <property name="checked">
              <bool>true</bool>
@@ -379,9 +379,9 @@
            </widget>
           </item>
           <item row="3" column="0">
-           <widget class="QCheckBox" name="isBrowsercheckBox_2">
+           <widget class="QCheckBox" name="isVPNcheckBox_2">
             <property name="text">
-             <string>직접 클립 받기 (더 빠름, 클립 막혀도 뚫림)</string>
+             <string>해외 IP로 클립 받기 (WAK ARK 전용 서버)</string>
             </property>
             <property name="checked">
              <bool>true</bool>
@@ -404,7 +404,7 @@
           <property name="bottomMargin">
            <number>200</number>
           </property>
-          <item row="0" column="0">
+          <item row="1" column="0">
            <layout class="QGridLayout" name="gridLayout_7" columnstretch="1,2">
             <item row="2" column="0">
              <widget class="QLabel" name="dateLabel_2">
@@ -511,13 +511,32 @@
             </item>
            </layout>
           </item>
-          <item row="1" column="0">
-           <widget class="QCheckBox" name="isBrowsercheckBox_3">
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="isVPNcheckBox_3">
             <property name="text">
              <string>직접 클립 받기 (더 빠름, 클립 막혀도 뚫림)</string>
             </property>
             <property name="checked">
              <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label">
+            <property name="font">
+             <font>
+              <pointsize>16</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+              <underline>false</underline>
+             </font>
+            </property>
+            <property name="text">
+             <string>이 옵션은 현재 동작하지 않습니다.
+차후 다른 프로그램으로 찾아뵙겠습니다.</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>

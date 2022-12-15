@@ -22,7 +22,7 @@ class Twitch_API():
         # 아래 두 주소 참고해서 본인만의 키를 발급 받아 사용하세요 킹아!
         # https://dev.twitch.tv/docs/api/get-started
         # https://dev.twitch.tv/docs/authentication/getting-tokens-oauth/#oauth-client-credentials-flow
-        self.headers={'Authorization': 'Bearer sev771hx6gxz7f9fso4utp5f1disxp', 'client-id': 'n0ngkqgxuek9p3fplo6uqxw5rv2gr1'}
+        self.headers={'Authorization': '', 'client-id': ''}
 
 
         # 스트리머별 ID
@@ -52,9 +52,15 @@ class Twitch_API():
 
         self.boo = False
 
+        self.proxy = False
+
     def clip_search_by_id(self, id, next_page=''):
 
-        response = requests.get("https://api.twitch.tv/helix/clips?id="+id+'&first=100'+next_page, headers=self.headers)
+        if not self.proxy:
+            response = requests.get("https://api.twitch.tv/helix/clips?id="+id+'&first=100'+next_page, headers=self.headers)
+        else:
+            response = requests.post('https://reqproxy.wakarkproxyworkers.workers.dev/', headers=self.headers,
+                                data="https://api.twitch.tv/helix/clips?id="+id+'&first=100'+next_page)
 
         res = response.json()
         clips = res['data']

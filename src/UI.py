@@ -134,9 +134,9 @@ class WindowClass(QMainWindow, main_ui) :
             self.argument['option2']['YTUpload'] = (a[2] == '1')
             self.argument['option3']['YTMake'] = (a[1] == '1')
             self.argument['option3']['YTUpload'] = (a[2] == '1')
-            self.argument['option1']['isBrowser'] = (a[3] == '1')
-            self.argument['option2']['isBrowser'] = (a[3] == '1')
-            self.argument['option3']['isBrowser'] = (a[3] == '1')
+            self.argument['option1']['isVPN'] = (a[3] == '1')
+            self.argument['option2']['isVPN'] = (a[3] == '1')
+            self.argument['option3']['isVPN'] = (a[3] == '1')
             if not self.argument['option1']['YTMake']:
                 self.YTMakecheckBox_2.toggle()
             if not self.argument['option1']['YTUpload']:
@@ -145,12 +145,12 @@ class WindowClass(QMainWindow, main_ui) :
                 self.YTMakecheckBox.toggle()
             if not self.argument['option2']['YTUpload']:
                 self.YTUploadcheckBox.toggle()
-            if not self.argument['option1']['isBrowser']:
-                self.isBrowsercheckBox.toggle()
-            if not self.argument['option2']['isBrowser']:
-                self.isBrowsercheckBox_2.toggle()
-            if not self.argument['option3']['isBrowser']:
-                self.isBrowsercheckBox_3.toggle()
+            if not self.argument['option1']['isVPN']:
+                self.isVPNcheckBox.toggle()
+            if not self.argument['option2']['isVPN']:
+                self.isVPNcheckBox_2.toggle()
+            if not self.argument['option3']['isVPN']:
+                self.isVPNcheckBox_3.toggle()
             f.close()
 
         self.stackedWidget.setCurrentIndex(5 if isFileExist else 0)
@@ -307,7 +307,7 @@ class WindowClass(QMainWindow, main_ui) :
             self.argument['option1']['addressList'] = [lineEdit.text() for lineEdit in self.stackedWidget.widget(2).findChildren(QLineEdit)]
             self.argument['option1']['YTMake'] = self.YTMakecheckBox_2.isChecked()
             self.argument['option1']['YTUpload'] = self.YTUploadcheckBox_2.isChecked()
-            self.argument['option1']['isBrowser'] = self.isBrowsercheckBox.isChecked()
+            self.argument['option1']['isVPN'] = self.isVPNcheckBox.isChecked()
 
         # option2
         elif self.pageList[2] == 3:
@@ -317,7 +317,7 @@ class WindowClass(QMainWindow, main_ui) :
             self.argument['option2']['endDate'] = self.endDate.text()
             self.argument['option2']['YTMake'] = self.YTMakecheckBox.isChecked()
             self.argument['option2']['YTUpload'] = self.YTUploadcheckBox.isChecked()
-            self.argument['option2']['isBrowser'] = self.isBrowsercheckBox_2.isChecked()
+            self.argument['option2']['isVPN'] = self.isVPNcheckBox_2.isChecked()
 
         # option3
         else :
@@ -327,7 +327,7 @@ class WindowClass(QMainWindow, main_ui) :
             self.argument['option3']['endDate'] = self.endDate_2.text()
             self.argument['option3']['YTMake'] = False
             self.argument['option3']['YTUpload'] = False
-            self.argument['option3']['isBrowser'] = self.isBrowsercheckBox_3.isChecked()
+            self.argument['option3']['isVPN'] = self.isVPNcheckBox_3.isChecked()
 
     def startLoad(self):
         self.makeArgument()
