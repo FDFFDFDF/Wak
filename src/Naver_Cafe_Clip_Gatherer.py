@@ -370,6 +370,7 @@ class Naver_Cafe_Clip_Gatherer():
 
             except:
                 time.sleep(0.05)
+                continue
 
             break
 
@@ -467,6 +468,7 @@ class Naver_Cafe_Clip_Gatherer():
 
         self.logger.info("게시글 링크 수집 시작")
         Page_Address_list = []
+        #for PA_idx in range(self.Page_Adrees_idx, len(Page_Num_Address_list)):
         for Page_Num_Address in Page_Num_Address_list:
 
             self.logger.info("게시글 목록 접속 : " + Page_Num_Address)
@@ -495,15 +497,15 @@ class Naver_Cafe_Clip_Gatherer():
             + Page_Num_Address[search_date_idx+21:search_date_idx+31]           # 해당 검색 끝 날짜
             + " 페이지 : " + Page_Num_Address[-1:])                              # 해당 검색 페이지 번호
 
+            #self.Page_Adrees_idx = self.Page_Adrees_idx + 1    
+
         return Page_Address_list
 
 
     def Get_Clip_URL(self, Page_Address_list):        
 
         ## 네이버 카페 게시글 접속 및 클립 주소 얻기 ##         
-        for PA_idx in range(self.Page_Adrees_idx, len(Page_Address_list)):
-            
-            Page_Address = Page_Address_list[PA_idx]
+        for Page_Address in Page_Address_list:
 
             #페이지 이동
             self.driver.get(Page_Address)
@@ -796,9 +798,7 @@ class Naver_Cafe_Clip_Gatherer():
                         
                 f_clips.close()
 
-                self.Page_Adrees_idx = self.Page_Adrees_idx + 1
-
-
+            '''
             self.driver.get('about:blank')
             try:
                 WebDriverWait(self.driver, 3).until(EC.alert_is_present())
@@ -807,7 +807,7 @@ class Naver_Cafe_Clip_Gatherer():
                 alert.accept()
             except:
                 pass
-
+            '''
 
         #print(Clip_links)
     
@@ -911,12 +911,14 @@ class Naver_Cafe_Clip_Gatherer():
             Page_Num_Address_list = self.Get_Board_Page_Num(st, et)
             
             if len(Page_Num_Address_list) == 0:
+                self.logger.warning("검색 결과가 없습니다. : " + st.strftime("%Y-%m-%d") +" ~ "+ et.strftime("%Y-%m-%d"))
                 continue
 
             # 게시글 주소
             Page_Address_list = self.Get_Article_URL(Page_Num_Address_list)
 
             if len(Page_Address_list) == 0:
+                self.logger.warning("해당 기간에 게시글이 없습니다. : " + st.strftime("%Y-%m-%d") +" ~ "+ et.strftime("%Y-%m-%d"))
                 continue            
             
             # 게시글의 클립 주소 수집 및 저장
